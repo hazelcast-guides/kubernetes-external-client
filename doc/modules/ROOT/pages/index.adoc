@@ -25,37 +25,104 @@ In this guide you will learn how to deploy Hazelcast Kubernetes cluster and conn
 All the code used in this guide is available in https://github.com/hazelcast-guides/kubernetes-external-client.git[here].
 To download it, execute the following command.
 
-[source, shell]
+[source, shell script]
 ----
 git clone https://github.com/hazelcast-guides/kubernetes-external-client.git
 ----
 
 == Configure Hazelcast cluster on Kubernetes
 
-As the first step, you need to start Hazelcast cluster in such a way that each member is exposed with a separate public IP/port. In Kubernetes PODs can be accessed from outside only via services, so the configuration requires creating a separate service (LoadBalancer or NodePort) for each Hazelcast member POD. The simplest way to achieve it is to use https://metacontroller.app/[Metacontroller] plugin with https://github.com/GoogleCloudPlatform/metacontroller/tree/master/examples/service-per-pod[Service-Per-Pod] Decorator Controller.
 
+=== Configure Service Account
 
-=== Install Metacontroller plugin
+Hazelcast uses Kubernetes API for the member discovery and therefore it requires granting permission to certain resources. To create ServiceAccount with minimal permissions, run the following command.
+
+[source, shell script]
+----
+kubectl apply -f rbac.yaml
+----
+
+The Service Account 'hazelcast-service-account' was created, and you can use it in all further steps.
+
+=== Install Hazelcast cluster
+
+To install Hazelcast cluster, you need to include the Service-Per-Pod annotations into your StatefulSet (or Deployment) Hazelcast configuration. Then, deploy Hazelcast cluster into your Kubernetes environment.
+
+[source, shell script]
+----
+kubectl apply -f hazelcast-cluster.yaml
+----
+
+To check the deployment you can run the following command:
+
+[source, shell script]
+----
+$ kubectl get pods
+NAME          READY   STATUS    RESTARTS   AGE
+hazelcast-0   1/1     Running   0          2m
+hazelcast-1   1/1     Running   0          2m
+hazelcast-2   1/1     Running   0          2m
+----
+
+[NOTE]
+====
+If you are using Minikube, you need to execute minikube tunnel now in order to get LoadBalancer External IPs assigned.
+====
+
+As the first step, you need to start Hazelcast cluster in such a way that each member is exposed with a separate public IP/port. In Kubernetes PODs can be accessed from outside only via services, so the configuration requires creating a separate service (LoadBalancer or NodePort) for each Hazelcast member POD. This can be done manually or using https://metacontroller.app/[Metacontroller] plugin with https://github.com/metacontroller/metacontroller/tree/master/examples/service-per-pod[Service-Per-Pod] Decorator Controller.
+
+[tabs]
+====
+Manual::
++
+--
+
+To create a `loadbalancer` for each running Hazelcast pod you need to run the following command:
+
+[source, shell script]
+----
+for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
+  kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml; \
+done
+----
+
+Check the services were created with by running the command:
+
+[source, shell script]
+----
+$ kubectl get svc
+NAME          TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)          AGE
+hazelcast-0   LoadBalancer   10.175.248.67    35.195.77.97    5701:30915/TCP   11m
+hazelcast-1   LoadBalancer   10.175.254.105   104.155.70.30   5701:30440/TCP   11m
+hazelcast-2   LoadBalancer   10.175.253.232   34.78.182.50    5701:30305/TCP   11m
+----
+
+--
+
+Metacontroller::
++
+--
+- Install Metacontroller plugin
 
 To install https://metacontroller.app/[Metacontroller] plugin, it's enough to execute the following commands:
 
-[source, shell]
+[source, shell script]
 ----
 # Create metacontroller namespace.
 kubectl create namespace metacontroller
 # Create metacontroller service account and role/binding.
-kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/metacontroller/master/manifests/metacontroller-rbac.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/master/manifests/metacontroller-rbac.yaml
 # Create CRDs for Metacontroller APIs, and the Metacontroller StatefulSet.
-kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/metacontroller/master/manifests/metacontroller.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/master/manifests/metacontroller.yaml
 ----
 
 If you have any issues while creating Metacontroller, it may mean that you don't have ClusterRole access to your cluster. Please check https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#defining_permissions_in_a_role[this] for details.
 
-=== Install Service-Per-Pod DecoratorController
+- Install Service-Per-Pod DecoratorController
 
 To install Service-Per-Pod Decorator Controller, you need to execute the following commands.
 
-[source, shell]
+[source, shell script]
 ----
 kubectl create configmap service-per-pod-hooks -n metacontroller --from-file=hooks
 kubectl apply -f service-per-pod.yaml
@@ -68,35 +135,12 @@ annotations:
     service-per-pod-label: "statefulset.kubernetes.io/pod-name"
     service-per-pod-ports: "5701:5701"
 ----
-
-=== Configure Service Account
-
-Hazelcast uses Kubernetes API for the member discovery and therefore it requires granting permission to certain resources. To create ServiceAccount with minimal permissions, run the following command.
-
-[source, shell]
-----
-kubectl apply -f rbac.yaml
-----
-
-The Service Account 'hazelcast-service-account' was created and you can use it in all further steps.
-
-=== Install Hazelcast cluster
-
-To install Hazelcast cluster, you need to include the Service-Per-Pod annotations into your StatefulSet (or Deployment) Hazelcast configuration. Then, deploy Hazelcast cluster into your Kubernetes environment.
-
-[source, shell]
-----
-kubectl apply -f hazelcast-cluster.yaml
-----
-
-[NOTE]
-====
-If you are using Minikube, you need to execute minikube tunnel now in order to get LoadBalancer External IPs assigned.
+--
 ====
 
 You can check that for each Hazelcast Member POD there was a service created and that Hazelcast members formed a cluster.
 
-[source, shell]
+[source, shell script]
 ----
 $ kubectl get all
 NAME              READY     STATUS    RESTARTS   AGE
@@ -128,7 +172,7 @@ When we have a working Hazelcast cluster deployed on Kubernetes, we can connect 
 
 To check the IP address of the Kubernetes Master, use the following command.
 
-[source, shell]
+[source, shell script]
 ----
 $ kubectl cluster-info
 Kubernetes master is running at https://35.233.44.52
@@ -138,7 +182,7 @@ Kubernetes master is running at https://35.233.44.52
 
 First, you need to find the name of the secret for the created Service Account.
 
-[source, shell]
+[source, shell script]
 ----
 $ kubectl get secret
 NAME                                    TYPE                                  DATA   AGE
@@ -148,7 +192,7 @@ hazelcast-service-account-token-m8p82   kubernetes.io/service-account-token   3 
 
 Then, to fetch Access Token, use the following command.
 
-[source, shell]
+[source, shell script]
 ----
 $ kubectl get secret hazelcast-service-account-token-m8p82 -o jsonpath={.data.token} | base64 --decode | xargs echo
 eyJhbGciOiJSUzI1NiIsImtpZCI6InNfRVBNNHg1dFRlWHY1VmVNdVJtaHY3ZzZ6aEhQWWxZT2ZzNXQwcklSYzQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQtdG9rZW4tbThwODIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiaGF6ZWxjYXN0LXNlcnZpY2UtYWNjb3VudCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjhjNzJhYmU3LTgzMjYtNDk5ZC04Yzc2LWU2MzMzMDAwNzYzYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQifQ.af6PWcxOV3IN3C-SiSa6hbgW9TlernWC3b5K1dNLVplzBdnJKI-NjacgMfd03BcVnXNLpXHFxr5gbwwguv9ZjeOAz0FrrQvs7rLRnXcQaE0x7EcG1lyfQ8utwzUvSodEQN6kbzjBF0WWClGJXdtdQvVn9lcFqDjfC6Jugk7dDEaD9W_mDjIXZEaeEtUIR5tnivGwRxG0dEpYb0nj9xAC9fjq40BTHWlbuVoFBhVl3-kPZreIiYHQYurOx30wuszuu0Ba16MbxyPB4rvzufngb8ej5S-KtUllxHiuYA4Gp01zbjb8RIsnB-OM02fCfIgG-YyyQjjD0K-BEEyuihs-0g
@@ -156,7 +200,7 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6InNfRVBNNHg1dFRlWHY1VmVNdVJtaHY3ZzZ6aEhQWWxZT2ZzNXQw
 
 To fetch CA Certificate, use the following command.
 
-[source, shell]
+[source, shell script]
 ----
 $ kubectl get secret hazelcast-service-account-token-6s94h -o jsonpath='{.data.ca\.crt}' | base64 --decode
 -----BEGIN CERTIFICATE-----
@@ -220,7 +264,7 @@ hazelcast-client:
 
 You can run the client application with the following command.
 
-[source, shell]
+[source, shell script]
 ----
 mvn spring-boot:run
 ----
@@ -228,7 +272,7 @@ mvn spring-boot:run
 Application is a web service that uses Hazelcast Client to connect to the Hazelcast cluster.
 To check it works correctly, you can execute the following commands:
 
-[source, shell]
+[source, shell script]
 ----
 $ curl "localhost:8080/put?key=some-key&value=some-value"
 {"response":null}
@@ -239,7 +283,7 @@ $ curl "localhost:8080/get?key=some-key"
 
 You can also check the application logs to see:
 
-[source]
+[source, shell script]
 ----
 Members [3] {
 	Member [10.172.2.8]:5701 - 77fb7da6-79bd-4b5b-9c63-2c425a111c06
