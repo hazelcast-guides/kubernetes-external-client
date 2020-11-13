@@ -1,18 +1,16 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hazelcast-configuration
-data:
-  hazelcast.yaml: |-
-    hazelcast:
-      network:
-        join:
-          multicast:
-            enabled: false
-          kubernetes:
-            enabled: true
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: hazelcast-configuration
+# data:
+#   hazelcast.yaml: |-
+#     hazelcast:
+#       network:
+#         join:
+#           kubernetes:
+#             enabled: true
 
----
+# ---
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -37,17 +35,17 @@ spec:
       serviceAccountName: hazelcast-service-account
       containers:
       - name: hazelcast
-        image: hazelcast/hazelcast:4.0
+        image: hazelcast/hazelcast:4.1
         ports:
         - name: hazelcast
           containerPort: 5701
-        volumeMounts:
-        - name: hazelcast-storage
-          mountPath: /data/hazelcast
-        env:
-        - name: JAVA_OPTS
-          value: "-Dhazelcast.config=/data/hazelcast/hazelcast.yaml"
-      volumes:
-      - name: hazelcast-storage
-        configMap:
-          name: hazelcast-configuration
+        # volumeMounts:
+        # - name: hazelcast-storage
+        #   mountPath: /data/hazelcast
+        # env:
+        # - name: JAVA_OPTS
+        #   value: "-Dhazelcast.config=/data/hazelcast/hazelcast.yaml"
+      # volumes:
+      # - name: hazelcast-storage
+      #   configMap:
+      #     name: hazelcast-configuration
