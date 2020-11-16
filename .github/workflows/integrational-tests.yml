@@ -73,6 +73,16 @@ jobs:
       run: |-
         echo "::set-output name=ip::$(kubectl cluster-info | grep master | sed 's/.*\at //')"
 
+  run-maven:
+    name: Run Maven tests
+    runs-on: ubuntu-latest
+    needs: run-tests
+
+    steps:
+
+      - run: |-
+          echo ${{ fromJson(needs.run-tests.outputs.master_ip }}
+
   cleanup:
     name: Clean up
     runs-on: ubuntu-latest
