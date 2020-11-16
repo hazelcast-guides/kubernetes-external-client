@@ -17,6 +17,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: guides-tests
   GKE_ZONE: europe-west1-b
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
   run-tests:
