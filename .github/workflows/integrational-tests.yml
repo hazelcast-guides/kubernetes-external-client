@@ -100,7 +100,6 @@ jobs:
         kubectl config use-context $(kubectl config get-contexts -o name)
 
     - name: Clean up service
-      if: ${{ kubectl get pods -o jsonpath="{.items[*].metadata.name}" }}
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
           kubectl delete service ${pod} --ignore-not-found=true \
