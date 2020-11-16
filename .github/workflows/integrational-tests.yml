@@ -15,8 +15,8 @@ on: push
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
-  GKE_CLUSTER: cluster-1    # TODO: update to cluster name
-  GKE_ZONE: us-central1-c   # TODO: update to cluster zone
+  GKE_CLUSTER: guides-tests
+  GKE_ZONE: europe-west1-b
   DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
   IMAGE: static-site
 
@@ -45,13 +45,13 @@ jobs:
         gcloud components install kubectl
 
     - run: |-
-        gcloud container clusters get-credentials --region=us-central1-a jenkins
+        gcloud container clusters get-credentials --region="$GKE_ZONE" "$GKE_CLUSTER"
 
     - run: |-
         kubectl config use-context $(kubectl config get-contexts -o name)
 
     - run: |-
-        kubectl get po
+        kubectl get nodes
 #     # Get the GKE credentials so we can deploy to the cluster
 #     - run: |-
 #         gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
