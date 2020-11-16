@@ -11,9 +11,7 @@
 # For more support on how to run the workflow, please visit https://github.com/GoogleCloudPlatform/github-actions/tree/master/example-workflows/gke
 
 name: Test on GKE
-on:
-  push:
-    branches: main
+on: push
 
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
