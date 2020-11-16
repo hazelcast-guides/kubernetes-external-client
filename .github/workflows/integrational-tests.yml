@@ -44,6 +44,8 @@ jobs:
     - run: |-
         gcloud components install kubectl
 
+    - run: |-
+        gcloud container clusters get-credentials jenkins
 #     # Get the GKE credentials so we can deploy to the cluster
 #     - run: |-
 #         gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
