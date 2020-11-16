@@ -104,7 +104,7 @@ jobs:
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
           kubectl delete service ${pod} --ignore-not-found=true \
-        done;
+        done
       continue-on-error: true
 
     - name: Clean up RBAC
