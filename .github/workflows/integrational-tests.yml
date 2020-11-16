@@ -36,11 +36,6 @@ jobs:
         project_id: ${{ env.PROJECT_ID }}
         export_default_credentials: true 
 
-    # Configure Docker to use the gcloud command-line tool as a credential
-    # helper for authentication
-#     - run: |-
-#         gcloud --quiet auth activate-service-account
-    
     - run: |-
         gcloud components install kubectl
 
@@ -50,8 +45,28 @@ jobs:
     - run: |-
         kubectl config use-context $(kubectl config get-contexts -o name)
 
-    - run: |-
-        kubectl get nodes
+    - name: Apply RBAC
+      run: |-
+        kubectl apply -f rbac.yaml
+
+    - name: Deploy Hazelcast cluster
+      run: |-
+        kubectl apply -f hazelcast-cluster.yaml
+
+    - name: Wait for deployment to finish
+      run: |-
+        kubectl wait --for=condition=Ready pod/hazelcast-2 --timeout=60s
+
+    - name: Creating LoadBalancer for each pods
+      run: |-
+        for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
+          kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
+        done
+
+    - name: Fetch k8s master IP
+      run: |-
+        kubectl cluster-info | grep master | sed 's/.*\at //'
+
 #     # Get the GKE credentials so we can deploy to the cluster
 #     - run: |-
 #         gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
