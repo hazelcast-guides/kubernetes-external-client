@@ -60,7 +60,7 @@ jobs:
     - name: Creating LoadBalancer for each pods
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
-          kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
+          kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
         done
 
     - name: Fetch k8s master IP
