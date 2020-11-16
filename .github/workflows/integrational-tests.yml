@@ -17,8 +17,6 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: guides-tests
   GKE_ZONE: europe-west1-b
-  DEPLOYMENT_NAME: gke-test # TODO: update to deployment name
-  IMAGE: static-site
 
 jobs:
   run-tests:
@@ -72,6 +70,9 @@ jobs:
     name: Clean up
     runs-on: ubuntu-latest
 
+    needs: run-tests
+    if: true
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -94,7 +95,7 @@ jobs:
     - name: Clean up deployed resources
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
-          kubectl delete service ${pod} \
+          kubectl delete service ${pod} --ignore-not-found=true\
         done
         kubectl delete -f rbac.yaml --ignore-not-found=true
         kubectl delete -f hazelcast-cluster.yaml --ignore-not-found=true
