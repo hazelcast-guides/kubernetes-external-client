@@ -17,6 +17,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: guides-tests
   GKE_ZONE: europe-west1-b
+  # to allow add-path and set-env commands that are used by setup-gcloud@0.1.3
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
@@ -71,6 +72,7 @@ jobs:
     name: Clean up
     runs-on: ubuntu-latest
 
+    # wait until run-tests finishes but run the cleanup even if it fails
     needs: run-tests
     if: true
 
@@ -78,7 +80,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@0.1.3
       with:
         service_account_key: ${{ secrets.GKE_SA_KEY }}
         project_id: ${{ env.PROJECT_ID }}
@@ -96,7 +98,7 @@ jobs:
     - name: Clean up deployed resources
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
-          kubectl delete service ${pod} --ignore-not-found=true\
+          kubectl delete service ${pod} --ignore-not-found=true \
         done
         kubectl delete -f rbac.yaml --ignore-not-found=true
         kubectl delete -f hazelcast-cluster.yaml --ignore-not-found=true
