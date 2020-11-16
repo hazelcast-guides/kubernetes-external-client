@@ -65,12 +65,13 @@ jobs:
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
           kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
+          kubectl label service ${pod} test=true
         done;
 
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
-        ::set-output name=ip::$(kubectl cluster-info | grep master | sed 's/.*\at //')
+        echo "::set-output name=ip::$(kubectl cluster-info | grep master | sed 's/.*\at //')"
 
   cleanup:
     name: Clean up
@@ -101,9 +102,7 @@ jobs:
 
     - name: Clean up service
       run: |-
-        for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
-          kubectl delete service ${pod} --ignore-not-found=true \
-        done;
+        kubectl delete svc --selector='test=true'
       continue-on-error: true
 
     - name: Clean up RBAC
