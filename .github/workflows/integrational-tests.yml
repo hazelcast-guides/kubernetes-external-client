@@ -42,7 +42,7 @@ jobs:
 #         gcloud --quiet auth activate-service-account
     
     - run: |-
-        gcloud info
+        gcloud components list
 
 #     # Get the GKE credentials so we can deploy to the cluster
 #     - run: |-
