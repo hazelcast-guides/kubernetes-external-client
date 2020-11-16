@@ -26,6 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
 
+    outputs:
+      master_ip: ${{ steps.master-ip.outputs.ip }}
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -65,8 +68,9 @@ jobs:
         done
 
     - name: Fetch k8s master IP
+      id: master-ip
       run: |-
-        kubectl cluster-info | grep master | sed 's/.*\at //'
+        ::set-output name=ip::$(kubectl cluster-info | grep master | sed 's/.*\at //')
 
   cleanup:
     name: Clean up
