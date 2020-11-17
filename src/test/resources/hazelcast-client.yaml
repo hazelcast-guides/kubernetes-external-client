@@ -1,9 +1,0 @@
-hazelcast-client:
-  network:
-    kubernetes:
-      enabled: true
-      namespace: default
-      use-public-ip: true
-      kubernetes-master: https://MASTER_IP
-      api-token: API_TOKEN
-      ca-certificate: |

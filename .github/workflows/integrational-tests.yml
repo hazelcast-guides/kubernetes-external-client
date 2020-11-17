@@ -102,32 +102,9 @@ jobs:
       with:
         java-version: 1.8
 
-    - name: test location
-      run: |-
-        ls -la
-        ls -la src/
-        ls -la src/test
-        ls -la src/test/resources
-        file ${TEST_CONFIG_FILE}
-
-    - name: Prepare test config
-      run: |-
-        masterIp="${{ needs.run-tests.outputs.master_ip }}"
-        apiToken="${{ needs.run-tests.outputs.api_token }}"
-        caCertificate="${{ needs.run-tests.outputs.ca_certificate }}"
-        sed -i "s/MASTER_IP/$masterIp/g" "$TEST_CONFIG_FILE"
-        sed -i "s/API_TOKEN/$apiToken/g" "$TEST_CONFIG_FILE"
-
-        while IFS= read -r line
-        do
-          echo "        $line" >> $TEST_CONFIG_FILE
-        done < <(echo $caCertificate)
-
-    - name: Echo test
-      run: cat $TEST_CONFIG_FILE
-
     - name: Run Maven tests
-      run: mvn test
+      run: |-
+        KUBERNETES_MASTER="https://${{ needs.run-tests.outputs.master_ip }}" API_TOKEN="${{ needs.run-tests.outputs.api_token }}" CA_CERTIFICATE="${{ needs.run-tests.outputs.ca_certificate }}" mvn test
 
   cleanup:
     name: Clean up
