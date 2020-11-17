@@ -23,6 +23,8 @@ class ApplicationTest {
     void shouldConnectToHazelcastCluster() {
         System.out.println("~~~~~~~~");
         System.out.println(System.getenv("KUBERNETES_MASTER"));
+        System.out.println(System.getenv("API_TOKEN"));
+        System.out.println(System.getenv("CA_CERTIFICATE"));
         ClientConfig config = new ClientConfig();
         config.setInstanceName("dev");
         KubernetesConfig kubernetesConfig = new KubernetesConfig();
