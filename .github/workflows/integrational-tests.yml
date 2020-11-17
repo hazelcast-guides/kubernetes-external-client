@@ -115,8 +115,8 @@ jobs:
         masterIp="${{ needs.run-tests.outputs.master_ip }}"
         apiToken="${{ needs.run-tests.outputs.api_token }}"
         caCertificate="${{ needs.run-tests.outputs.ca_certificate }}"
-        sed -i '' "s/MASTER_IP/$masterIp/g" "$TEST_CONFIG_FILE"
-        sed -i '' "s/API_TOKEN/$apiToken/g" "$TEST_CONFIG_FILE"
+        sed -i "s/MASTER_IP/$masterIp/g" "$TEST_CONFIG_FILE"
+        sed -i "s/API_TOKEN/$apiToken/g" "$TEST_CONFIG_FILE"
 
         while IFS= read -r line \
         do \
