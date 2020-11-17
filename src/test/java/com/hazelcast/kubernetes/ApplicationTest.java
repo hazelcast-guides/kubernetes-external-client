@@ -21,6 +21,8 @@ class ApplicationTest {
 
     @Test
     void shouldConnectToHazelcastCluster() {
+        System.out.println("~~~~~~~~");
+        System.out.println(System.getenv("KUBERNETES_MASTER"));
         ClientConfig config = new ClientConfig();
         config.setInstanceName("dev");
         KubernetesConfig kubernetesConfig = new KubernetesConfig();
