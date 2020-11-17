@@ -34,7 +34,7 @@ class ApplicationTest {
 //            System.out.println(c == c1);
         }
         System.out.println("https://35.241.202.149");
-        System.out.println(System.getenv("KUBERNETES_MASTER").equals("https://35.241.202.149"));
+        System.out.println(System.getenv("KUBERNETES_MASTER").trim().equals("https://35.241.202.149"));
         System.out.println(System.getenv("API_TOKEN"));
         System.out.println(System.getenv("CA_CERTIFICATE"));
         ClientConfig config = new ClientConfig();
