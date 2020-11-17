@@ -75,7 +75,7 @@ jobs:
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
-        ip=$(kubectl cluster-info | grep master | awk -Fhttps:// '{print $NF}')
+        ip=$(kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}')
         echo "::set-output name=ip::$ip"
 
     - name: Fetch k8s escrets
@@ -110,7 +110,7 @@ jobs:
         caCertificate="${{ needs.run-tests.outputs.ca_certificate }}"
         apiToken="${{ needs.run-tests.outputs.api_token }}"
         masterIp="${{ needs.run-tests.outputs.master_ip }}"
-        KUBERNETES_MASTER="https://${masterIp}" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test
+        KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test
 
   cleanup:
     name: Clean up
