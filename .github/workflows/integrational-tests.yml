@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # wait until run-tests finishes but run the cleanup even if it fails
-    needs: run-tests
+    needs: [run-tests, run-maven]
     if: true
 
     steps:
