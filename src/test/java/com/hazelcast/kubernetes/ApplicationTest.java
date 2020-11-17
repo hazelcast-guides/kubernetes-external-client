@@ -29,7 +29,8 @@ class ApplicationTest {
         config.setInstanceName("dev");
         KubernetesConfig kubernetesConfig = new KubernetesConfig();
         kubernetesConfig.setEnabled(true);
-        kubernetesConfig.setProperty("kubernetes-master", System.getenv("KUBERNETES_MASTER"));
+//        kubernetesConfig.setProperty("kubernetes-master", System.getenv("KUBERNETES_MASTER"));
+        kubernetesConfig.setProperty("kubernetes-master", "https://35.241.202.149");
         kubernetesConfig.setProperty("namespace", "default");
         kubernetesConfig.setProperty("api-token", System.getenv("API_TOKEN"));
         kubernetesConfig.setProperty("ca-certificate", System.getenv("CA_CERTIFICATE"));
