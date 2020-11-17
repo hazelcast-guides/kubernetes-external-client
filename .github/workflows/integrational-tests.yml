@@ -17,6 +17,7 @@ env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: guides-tests
   GKE_ZONE: europe-west1-b
+  TEST_CONFIG_FILE: src/test/resources/hazelcast-client.yaml
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
@@ -27,6 +28,8 @@ jobs:
 
     outputs:
       master_ip: ${{ steps.master-ip.outputs.ip }}
+      api_token: ${{ steps.secrets.outputs.apiToken }}
+      ca_certificate: ${{ steps.secrets.outputs.caCertificate }}
 
     steps:
     - name: Checkout
@@ -70,8 +73,17 @@ jobs:
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
-        ip=$(kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}')
+        ip=$(kubectl cluster-info | grep master | awk -Fhttps:// '{print $NF}')
         echo "::set-output name=ip::$ip"
+
+    - name: Fetch k8s escrets
+      id: secrets
+      run: |-
+        secret=$(kubectl get secret -o name | grep hazelcast)
+        apiToken=$(kubectl get $secret -o jsonpath={.data.token} | base64 --decode | xargs echo)
+        caCertificate=$(kubectl get $secret -o jsonpath='{.data.ca\.crt}' | base64 --decode)
+        echo "::set-output name=apiToken::$apiToken"
+        echo "::set-output name=caCertificate::$caCertificate"
 
   run-maven:
     name: Run Maven tests
@@ -79,9 +91,26 @@ jobs:
     needs: run-tests
 
     steps:
+      -
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
 
-      - run: |-
-          echo "${{ needs.run-tests.outputs.master_ip }}"
+    - name: Prepare test config
+      run: |-
+        masterIp=${{ needs.run-tests.outputs.master_ip }}
+        apiToken=${{ needs.run-tests.outputs.api_token }}
+        caCertificate=${{ needs.run-tests.outputs.ca_certificate }}
+        sed -i '' "s/MASTER_IP/$masterIp/g" $TEST_CONFIG_FILE
+        sed -i '' "s/API_TOKEN/$apiToken/g" $TEST_CONFIG_FILE
+        sed -i '' "s/CA_CERTIFICATE/$caCertificate/g" $TEST_CONFIG_FILE
+
+    - name: Echo test
+      run: cat $TEST_CONFIG_FILE
+
+    - name: Run Maven tests
+      run: mvn test
 
   cleanup:
     name: Clean up
