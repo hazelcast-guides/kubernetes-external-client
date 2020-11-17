@@ -25,12 +25,13 @@ class ApplicationTest {
         String masterIp = System.getenv("KUBERNETES_MASTER");
         String hardcodedValue = "https://35.241.202.149";
         System.out.println(masterIp);
+        System.out.println(hardcodedValue);
         for (int i = 0; i < masterIp.length(); i++) {
             char c = masterIp.charAt(i);
+//            char c1 = hardcodedValue.charAt(i);
             System.out.println("Char :" + c);
-            char c1 = hardcodedValue.charAt(i);
-            System.out.println("Char :" + c1);
-            System.out.println(c == c1);
+//            System.out.println("Hard :" + c1);
+//            System.out.println(c == c1);
         }
         System.out.println("https://35.241.202.149");
         System.out.println(System.getenv("KUBERNETES_MASTER").equals("https://35.241.202.149"));
