@@ -84,6 +84,9 @@ jobs:
         secret=$(kubectl get secret -o name | grep hazelcast)
         apiToken=$(kubectl get $secret -o jsonpath={.data.token} | base64 --decode | xargs echo)
         caCertificate=$(kubectl get $secret -o jsonpath='{.data.ca\.crt}' | base64 --decode)
+        caCertificate="${caCertificate//'%'/'%25'}"
+        caCertificate="${caCertificate//$'\n'/'%0A'}"
+        caCertificate="${caCertificate//$'\r'/'%0D'}"
         echo "::set-output name=apiToken::$apiToken"
         echo "::set-output name=caCertificate::$caCertificate"
 
