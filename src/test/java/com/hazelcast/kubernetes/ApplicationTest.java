@@ -22,7 +22,7 @@ class ApplicationTest {
     @Test
     void shouldConnectToHazelcastCluster() {
         System.out.println("~~~~~~~~");
-        String masterIp = System.getenv("KUBERNETES_MASTER");
+        String masterIp = System.getenv("KUBERNETES_MASTER").trim();
         String hardcodedValue = "https://35.241.202.149";
         System.out.println(masterIp);
         System.out.println(hardcodedValue);
