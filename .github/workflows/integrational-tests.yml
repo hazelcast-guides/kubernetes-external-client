@@ -67,7 +67,7 @@ jobs:
       run: |-
         for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
           kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
-          kubectl label service ${pod} test=true
+          kubectl label service ${pod} test=true; \
         done;
 
     - name: Fetch k8s master IP
