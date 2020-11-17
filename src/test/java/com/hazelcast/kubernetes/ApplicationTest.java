@@ -22,7 +22,16 @@ class ApplicationTest {
     @Test
     void shouldConnectToHazelcastCluster() {
         System.out.println("~~~~~~~~");
-        System.out.println(System.getenv("KUBERNETES_MASTER"));
+        String masterIp = System.getenv("KUBERNETES_MASTER");
+        String hardcodedValue = "https://35.241.202.149";
+        System.out.println(masterIp);
+        for (int i = 0; i < masterIp.length(); i++) {
+            char c = masterIp.charAt(i);
+            System.out.println("Char :" + c);
+            char c1 = hardcodedValue.charAt(i);
+            System.out.println("Char :" + c1);
+            System.out.println(c == c1);
+        }
         System.out.println("https://35.241.202.149");
         System.out.println(System.getenv("KUBERNETES_MASTER").equals("https://35.241.202.149"));
         System.out.println(System.getenv("API_TOKEN"));
@@ -31,7 +40,7 @@ class ApplicationTest {
         config.setInstanceName("dev");
         KubernetesConfig kubernetesConfig = new KubernetesConfig();
         kubernetesConfig.setEnabled(true);
-//        kubernetesConfig.setProperty("kubernetes-master", System.getenv("KUBERNETES_MASTER"));
+        kubernetesConfig.setProperty("kubernetes-master", masterIp);
         kubernetesConfig.setProperty("kubernetes-master", "https://35.241.202.149");
         kubernetesConfig.setProperty("namespace", "default");
         kubernetesConfig.setProperty("api-token", System.getenv("API_TOKEN"));
