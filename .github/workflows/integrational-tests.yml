@@ -70,8 +70,7 @@ jobs:
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
-        kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}'
-        ip=$(kubectl cluster-info | grep master | sed 's/.*\at //')
+        ip=$(kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}')
         echo "::set-output name=ip::$ip"
 
   run-maven:
