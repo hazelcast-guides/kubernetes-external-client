@@ -7,3 +7,5 @@ hazelcast-client:
       kubernetes-master: https://MASTER_IP
       api-token: API_TOKEN
       ca-certificate: |
+        -----BEGIN CERTIFICATE-----sss
+        -----BEGIN CERTIFICATE-----sss
