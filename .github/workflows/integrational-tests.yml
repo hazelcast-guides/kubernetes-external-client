@@ -96,6 +96,9 @@ jobs:
     needs: run-tests
     continue-on-error: true
 
+    outputs:
+      test-result: ${{ success() }}
+
     steps:
 
     - name: Checkout
@@ -113,12 +116,13 @@ jobs:
         masterIp="${{ needs.run-tests.outputs.master_ip }}"
         KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
 
+
   cleanup:
     name: Clean up
     runs-on: ubuntu-latest
 
-    # wait until run-tests finishes but run the cleanup even if it fails
-    needs: [run-tests, run-maven]
+    # wait until run-maven finishes but run the cleanup even if it fails
+    needs: run-maven
     if: true
 
     steps:
@@ -154,3 +158,8 @@ jobs:
       run: |-
         kubectl delete -f hazelcast-cluster.yaml --ignore-not-found=true
       continue-on-error: true
+
+    - name: Test result
+      run: |-
+        testResult="${{ needs.run-tests.outputs.test-result }}"
+        echo $testResult
