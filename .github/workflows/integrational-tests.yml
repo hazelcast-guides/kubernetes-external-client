@@ -71,6 +71,7 @@ jobs:
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
+        kubectl cluster-info | grep master | sed 's/.*\at //'
         ip=$(kubectl cluster-info | grep master | sed 's/.*\at //')
         echo "::set-output name=ip::$ip"
 
