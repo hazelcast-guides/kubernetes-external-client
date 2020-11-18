@@ -99,21 +99,15 @@ jobs:
         caCertificate=$(kubectl get $secret -o jsonpath='{.data.ca\.crt}' | base64 --decode)
 
         KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
-      continue-on-error: true
+      timeout-minutes: 10
 
     # Clean up
-    - name: Clean up resources
-      run: |-
-        kubectl delete svc --selector='test=true'
-        kubectl delete -f rbac.yaml --ignore-not-found=true
-        kubectl delete -f hazelcast-cluster.yaml --ignore-not-found=true
-      continue-on-error: true
-
     - name: Delete cluster
       run: |-
         gcloud container clusters delete "$GKE_CLUSTER" --zone="$GKE_ZONE" --quiet
 
-    - name: Assert job status
+    - name: Clean up of failure
       if: ${{ failure() }}
       run: |-
+        gcloud container clusters delete "$GKE_CLUSTER" --zone="$GKE_ZONE" --quiet
         exit 1
