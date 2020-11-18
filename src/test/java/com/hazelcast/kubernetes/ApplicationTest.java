@@ -27,7 +27,6 @@ class ApplicationTest {
         KubernetesConfig kubernetesConfig = new KubernetesConfig();
         kubernetesConfig.setEnabled(true);
         kubernetesConfig.setProperty("kubernetes-master", masterIp);
-        kubernetesConfig.setProperty("kubernetes-master", "https://35.241.202.149");
         kubernetesConfig.setProperty("namespace", "default");
         kubernetesConfig.setProperty("api-token", System.getenv("API_TOKEN"));
         kubernetesConfig.setProperty("ca-certificate", System.getenv("CA_CERTIFICATE"));
