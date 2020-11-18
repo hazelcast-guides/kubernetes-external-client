@@ -97,7 +97,7 @@ jobs:
     continue-on-error: true
 
     outputs:
-      test-result: ${{ success() }}
+      test-failed: ${{ steps.test.outputs.testFailed }}
 
     steps:
 
@@ -115,7 +115,13 @@ jobs:
         apiToken="${{ needs.run-tests.outputs.api_token }}"
         masterIp="${{ needs.run-tests.outputs.master_ip }}"
         KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
+      continue-on-error: true
 
+    - name: The job has failed
+      id: test
+      if: ${{ failure() }}
+      run: |-
+        echo "::set-output name=testFailed::true"
 
   cleanup:
     name: Clean up
@@ -161,5 +167,5 @@ jobs:
 
     - name: Test result
       run: |-
-        testResult="${{ needs.run-tests.outputs.test-result }}"
-        echo $testResult
+        testResult="${{ needs.run-tests.outputs.test-failed }}"
+        exit 1
