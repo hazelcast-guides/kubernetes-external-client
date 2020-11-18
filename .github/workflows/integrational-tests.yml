@@ -95,9 +95,6 @@ jobs:
         secret=$(kubectl get secret -o name | grep hazelcast)
         apiToken=$(kubectl get $secret -o jsonpath={.data.token} | base64 --decode | xargs echo)
         caCertificate=$(kubectl get $secret -o jsonpath='{.data.ca\.crt}' | base64 --decode)
-        caCertificate="${caCertificate//'%'/'%25'}"
-        caCertificate="${caCertificate//$'\n'/'%0A'}"
-        caCertificate="${caCertificate//$'\r'/'%0D'}"
 
         KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
       continue-on-error: true
