@@ -90,8 +90,7 @@ jobs:
         echo "masterIp=$ip" >> $GITHUB_ENV
       continue-on-error: true
 
-    - name: Fetch k8s escrets
-      id: secrets
+    - name: Run Maven tests
       run: |-
         secret=$(kubectl get secret -o name | grep hazelcast)
         apiToken=$(kubectl get $secret -o jsonpath={.data.token} | base64 --decode | xargs echo)
@@ -99,12 +98,7 @@ jobs:
         caCertificate="${caCertificate//'%'/'%25'}"
         caCertificate="${caCertificate//$'\n'/'%0A'}"
         caCertificate="${caCertificate//$'\r'/'%0D'}"
-        echo "apiToken=$apiToken" >> $GITHUB_ENV
-        echo "caCertificate=$caCertificate" >> $GITHUB_ENV
-      continue-on-error: true
 
-    - name: Run Maven tests
-      run: |-
         KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
       continue-on-error: true
 
@@ -116,6 +110,7 @@ jobs:
         kubectl delete -f hazelcast-cluster.yaml --ignore-not-found=true
       continue-on-error: true
 
-    - name: Job has failed
+    - name: Assert job status
       if: ${{ failure() }}
-      run: exit 1
+      run: |-
+        exit 1
