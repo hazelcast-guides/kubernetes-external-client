@@ -61,24 +61,20 @@ jobs:
 
     - run: |-
         kubectl config use-context $(kubectl config get-contexts -o name)
-      continue-on-error: true
 
     - name: Apply RBAC
       run: |-
         kubectl apply -f rbac.yaml
-      continue-on-error: true
 
     - name: Deploy Hazelcast cluster
       run: |-
         kubectl apply -f hazelcast-cluster.yaml
-      continue-on-error: true
 
     - name: Wait for deployment to finish
       run: |-
         kubectl wait --for=condition=ready pod/hazelcast-0 --timeout=20s
         kubectl wait --for=condition=ready pod/hazelcast-1 --timeout=20s
         kubectl wait --for=condition=ready pod/hazelcast-2 --timeout=20s
-      continue-on-error: true
 
     - name: Creating LoadBalancer for each pods
       run: |-
@@ -86,14 +82,12 @@ jobs:
           kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
           kubectl label service ${pod} test=true; \
         done;
-      continue-on-error: true
 
     - name: Fetch k8s master IP
       id: master-ip
       run: |-
         ip=$(kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}')
         echo "masterIp=$ip" >> $GITHUB_ENV
-      continue-on-error: true
 
     - name: Run Maven tests
       run: |-

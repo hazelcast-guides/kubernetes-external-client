@@ -35,10 +35,9 @@ class ApplicationTest {
         config.setNetworkConfig(networkConfig);
 
         HazelcastInstance hazelcastInstance = HazelcastClient.newHazelcastClient(config);
-        IMap<String, String> mapToPut = hazelcastInstance.getMap("map");
-        mapToPut.put("key", "value");
+        IMap<String, String> map = hazelcastInstance.getMap("map");
+        map.put("key", "value");
 
-        IMap<Object, Object> mapToGet = hazelcastInstance.getMap("map");
-        assertEquals("value", mapToGet.get("key"));
+        assertEquals("value", map.get("key"));
     }
 }
