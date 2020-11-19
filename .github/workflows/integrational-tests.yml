@@ -54,7 +54,8 @@ jobs:
         gcloud components install kubectl
 
     - run: |-
-        echo "clusterName=$GITHUB_ACTION-$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        clusterName="$GITHUB_ACTION-$GITHUB_RUN_NUMBER"
+        echo "clusterName=$clusterName" >> $GITHUB_ENV
         gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
 
     - run: |-
