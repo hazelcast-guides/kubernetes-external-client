@@ -54,10 +54,11 @@ jobs:
         gcloud components install kubectl
 
     - run: |-
-        gcloud container clusters create "$GKE_CLUSTER" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
+        echo "clusterName=$GITHUB_ACTION-$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
 
     - run: |-
-        gcloud container clusters get-credentials --region="$GKE_ZONE" "$GKE_CLUSTER"
+        gcloud container clusters get-credentials --region="$GKE_ZONE" "$clusterName"
 
     - run: |-
         kubectl config use-context $(kubectl config get-contexts -o name)
@@ -101,10 +102,10 @@ jobs:
     # Clean up
     - name: Delete cluster
       run: |-
-        gcloud container clusters delete "$GKE_CLUSTER" --zone="$GKE_ZONE" --quiet
+        gcloud container clusters delete "$clusterName" --zone="$GKE_ZONE" --quiet
 
     - name: Clean up of failure
       if: ${{ failure() }}
       run: |-
-        gcloud container clusters delete "$GKE_CLUSTER" --zone="$GKE_ZONE" --quiet
+        gcloud container clusters delete "$clusterName" --zone="$GKE_ZONE" --quiet
         exit 1
