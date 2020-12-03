@@ -3,14 +3,14 @@
 :hazelcast: Hazelcast IMDG
 :framework: Kubernetes
 
-= External Hazelcast Client on Kubernetes
+= Connect To Hazelcast Running on Kubernetes from Outside
 
-This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Smart Client running outside of Kubernetes.
+This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes.
 This example assumes you have a running Kubernetes cluster and the kubectl tool installed and configured.
 
 == What You’ll Learn
 
-In this guide you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using external client.
+In this guide you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
 
 == Prerequisites
 
@@ -166,7 +166,7 @@ Members {size:3, ver:3} [
 
 == Configure Hazelcast Client outside Kubernetes
 
-When we have a working Hazelcast cluster deployed on Kubernetes, we can connect to it with an external Hazelcast Smart Client. You need first to fetch the credentials of the created Service Account and then use them to configure the client.
+When we have a working Hazelcast cluster deployed on Kubernetes, we can connect to it with an external Hazelcast Client. You need first to fetch the credentials of the created Service Account and then use them to configure the client.
 
 === Check Kubernetes Master IP
 
