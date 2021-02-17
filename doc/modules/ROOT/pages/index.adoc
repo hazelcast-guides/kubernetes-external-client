@@ -111,9 +111,11 @@ To install https://metacontroller.app/[Metacontroller] plugin, it's enough to ex
 # Create metacontroller namespace.
 kubectl create namespace metacontroller
 # Create metacontroller service account and role/binding.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/master/manifests/metacontroller-rbac.yaml
-# Create CRDs for Metacontroller APIs, and the Metacontroller StatefulSet.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/master/manifests/metacontroller.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
+# Create CRDs for Metacontroller APIs
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
+# Create Metacontroller StatefulSet.
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
 ----
 
 If you have any issues while creating Metacontroller, it may mean that you don't have ClusterRole access to your cluster. Please check https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#defining_permissions_in_a_role[this] for details.
