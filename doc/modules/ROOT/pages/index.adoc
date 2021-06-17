@@ -15,7 +15,7 @@ In this guide you will learn how to deploy Hazelcast Kubernetes cluster and conn
 
 == Prerequisites
 
-* Up and running https://kubernetes.io/[Kubernetes] cluster (https://www.docker.com/products/docker-desktop[Docker for Desktop] or https://minikube.sigs.k8s.io/docs/[Minikube] is good enough)
+* Up and running https://kubernetes.io/[Kubernetes] cluster (https://minikube.sigs.k8s.io/docs/[Minikube] is good enough)
 * Kubernetes command line tool, https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubectl]
 
 == Configure Hazelcast cluster on Kubernetes
@@ -102,7 +102,7 @@ To create a `loadbalancer` for each running Hazelcast pod you need to run the fo
 [source, shell script]
 ----
 for pod in $(kubectl get pods --selector=role=hazelcast -o jsonpath="{.items[*].metadata.name}"); do \
-  kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
+  kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "name=${pod}" -o yaml | kubectl create -f -; \
 done
 ----
 --
@@ -162,108 +162,116 @@ hz-hazelcast-2   LoadBalancer   10.175.253.232   34.78.182.50    5701:30305/TCP 
 
 == Configure Hazelcast Client outside Kubernetes
 
-When we have a working Hazelcast cluster deployed on Kubernetes, we can connect to it with an external Hazelcast Smart Client. You need first to fetch the credentials of the created Service Account and then use them to configure the client.
+When we have a working Hazelcast cluster deployed on Kubernetes, we can connect to it with an external Hazelcast Smart Client.
 
-=== Check Kubernetes Master IP
+To use Hazelcast client, add Hazelcast client dependency to your application.
 
-To check the IP address of the Kubernetes Master, use the following command.
+[tabs]
+====
 
-[source, shell script]
+Java::
++
+--
+.pom.xml
+[source, xml]
 ----
-$ kubectl cluster-info
-Kubernetes master is running at https://35.233.44.52
+<dependency>
+    <groupId>com.hazelcast</groupId>
+    <artifactId>hazelcast</artifactId>
+    <version>${hazelcast.version}</version>
+</dependency>
 ----
+--
 
-=== Check Access Token and CA Certificate
-
-First, you need to find the name of the secret for the created Service Account.
-
-[source, shell script]
+NodeJS::
++
+--
+[source, bash]
 ----
-$ kubectl get secret
-NAME                                    TYPE                                  DATA   AGE
-default-token-7xd6t                     kubernetes.io/service-account-token   3      102m
-hazelcast-service-account-token-m8p82   kubernetes.io/service-account-token   3      35m
+npm install hazelcast-client
 ----
+--
+====
 
-Then, to fetch Access Token, use the following command.
+Check again the EXTERNAL-IP (or `NODE-IP:NODE_PORT` in case of using NodePort services) of your LoadBalancer service.
 
-[source, shell script]
+[source, bash]
 ----
-$ kubectl get secret hazelcast-service-account-token-m8p82 -o jsonpath={.data.token} | base64 --decode | xargs echo
-eyJhbGciOiJSUzI1NiIsImtpZCI6InNfRVBNNHg1dFRlWHY1VmVNdVJtaHY3ZzZ6aEhQWWxZT2ZzNXQwcklSYzQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQtdG9rZW4tbThwODIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiaGF6ZWxjYXN0LXNlcnZpY2UtYWNjb3VudCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjhjNzJhYmU3LTgzMjYtNDk5ZC04Yzc2LWU2MzMzMDAwNzYzYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQifQ.af6PWcxOV3IN3C-SiSa6hbgW9TlernWC3b5K1dNLVplzBdnJKI-NjacgMfd03BcVnXNLpXHFxr5gbwwguv9ZjeOAz0FrrQvs7rLRnXcQaE0x7EcG1lyfQ8utwzUvSodEQN6kbzjBF0WWClGJXdtdQvVn9lcFqDjfC6Jugk7dDEaD9W_mDjIXZEaeEtUIR5tnivGwRxG0dEpYb0nj9xAC9fjq40BTHWlbuVoFBhVl3-kPZreIiYHQYurOx30wuszuu0Ba16MbxyPB4rvzufngb8ej5S-KtUllxHiuYA4Gp01zbjb8RIsnB-OM02fCfIgG-YyyQjjD0K-BEEyuihs-0g
-----
-
-To fetch CA Certificate, use the following command.
-
-[source, shell script]
-----
-$ kubectl get secret hazelcast-service-account-token-6s94h -o jsonpath='{.data.ca\.crt}' | base64 --decode
------BEGIN CERTIFICATE-----
-MIIDKjCCAhKgAwIBAgIQHJPQGLRW659SCjtRVEF23TANBgkqhkiG9w0BAQsFADAv
-MS0wKwYDVQQDEyQzMjU5YmE1ZC03MWVhLTRiNGYtODZmNi0yOGFmNzYzZTg0NWYw
-HhcNMjAxMTA5MTE1MjU1WhcNMjUxMTA4MTI1MjU1WjAvMS0wKwYDVQQDEyQzMjU5
-YmE1ZC03MWVhLTRiNGYtODZmNi0yOGFmNzYzZTg0NWYwggEiMA0GCSqGSIb3DQEB
-AQUAA4IBDwAwggEKAoIBAQDCGVpermveJbIvrTcyHtC9zax+87cSPQCz7lfbI8gB
-75JpeDZy/32RUwG7xRFZ58gynqvkMG4z/ZjguXJsp8g9dT8qMLf01CbqyQscoVnL
-cyiicGNjnaMeQul8W3XN4uXlqTubFHYcA/quX07CJhRyES8JNliRdygQJdWF8aKs
-OirX2A0Vncoq6eGsr3yCJYTvxZQLNM/3wxCvUJPLJcYbKgIZUNZbvC8ovFG7ChAk
-G0V+Bw726eiiHGCMFAkz42f3/T+wxMdIAm2SKunT3OTyO9/6SCuJflPMB9/kPQRE
-yxH2H5FdW2p+qC2o2T5pgslmPkaJ7qck5JsgwoOgvwzhAgMBAAGjQjBAMA4GA1Ud
-DwEB/wQEAwICBDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBRtxNC8UAR7mXjC
-fXOV58kmMg7T8zANBgkqhkiG9w0BAQsFAAOCAQEAAJHer6jqoPGMEdjRSBxgW7yw
-DPU210ffOmWWuqGAHCbuAhcVZG5dce9KjTzKc/sWqI0qR3zrZhMpP06cce2NIsHr
-VbViVgPT0/K4oNP4l4BBaseLKNgfywOSUtmTtwyKbQJTHElwFwbMzBZF9kihZMah
-l0zhm5JizXwmBsE38r3+soS9mIvjASGcGp7exTftPyMP8xMuBUvg28Z9w8wxfHv4
-oZ/yor2Cp4bdGDGQvwKt/WqXfxIk4LW5jKUupoZ+2kkl8eYEE314PFIhayWcTrIf
-bnDp6Qq8bRQ6acz6CI5AaZROUQmRYmN8Aaz3THJmkfGcejzvbYux/GiD7Nxlkw==
------END CERTIFICATE-----
+kubectl get service hz-hazelcast
+NAME           TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)          AGE
+hz-hazelcast   LoadBalancer   10.108.141.178   10.96.184.178     5701:31434/TCP   5m44s
 ----
 
-=== Configure Hazelcast Client
+Configure the Hazelcast client in your application to connect to the your cluster using `EXTERNAL-IP` (or `NODE-IP:NODE_PORT` in case of using NodePort services).
 
-Modify src/main/resources/hazelcast-client.yaml to include your credentials and Kubernetes master IP.
+[tabs]
+====
 
-[source, yaml]
+Java::
++
+--
+[source, java]
 ----
-hazelcast-client:
-  network:
-    kubernetes:
-      enabled: true
-      namespace: default
-      use-public-ip: true
-      kubernetes-master: https://35.233.44.52
-      api-token: eyJhbGciOiJSUzI1NiIsImtpZCI6InNfRVBNNHg1dFRlWHY1VmVNdVJtaHY3ZzZ6aEhQWWxZT2ZzNXQwcklSYzQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQtdG9rZW4tbThwODIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiaGF6ZWxjYXN0LXNlcnZpY2UtYWNjb3VudCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjhjNzJhYmU3LTgzMjYtNDk5ZC04Yzc2LWU2MzMzMDAwNzYzYyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmhhemVsY2FzdC1zZXJ2aWNlLWFjY291bnQifQ.af6PWcxOV3IN3C-SwSa6hbgW9TlernWC3b5K1dNLVplzBdnJKI-NjacgMfd03BcVnXNLpXHFxr5gbwwguv9ZjeOAz0FrrQvs7rLRnXcQaE0x7EcG1lyfQ8utwzUvSodEQN6kbzjBF0WWClGJXdtdQvVn9lcFqDjfC6Jugk7dDEaD9W_mDjIXZEaeEtUIR5tnivGwRxG0dEpYb0nj9xAC9fjq40BTHWlbuVoFBhVl3-kPZreIiYHQYurOx30wuszuu0Ba16MbxyPB4rvzufngb8ej5S-KtUllxHiuYA4Gp01zbjb8RIsnB-OM02fCfIgG-YyyQjjD0K-BEEyuihs-0g
-      ca-certificate: |
-        -----BEGIN CERTIFICATE-----
-        MIIDKjCCAhKgAwIBAgIQHJPQGLRW659SCjtRVEF23TANBgkqhkiG9w0BAQsFADAv
-        MS0wKwYDVQQDEyQzMjU5YmE1ZC03MWVhLTRiNGYtODZmNi0yOGFmNzYzZTg0NWYw
-        HhcNMjAxMTA5MTE1MjU1WhcNMjUxMTA4MTI1MjU1WjAvMS0wKwYDVQQDEyQzMjU5
-        YmE1ZC03MWVhLTRiNGYtODZmNi0yOGFmNzYzZTg0NWYwggEiMA0GCSqGSIb3DQEB
-        AQUAA4IBDwAwggEKAoIBAQDCGVpermveJbIvrTcyHtC9zax+87cSPQCz7lfbI8gB
-        75JpeDZy/32RUwG7xRFZ58gynqvkMG4z/ZjguXJsp8g9dT8qMLf01CbqyQscoVnL
-        cyiicGNjnaMeQul8W3XN4uXlqTubFHYcA/quX02CJhRyES8JNliRdygQJdWF8aKs
-        OirX2A0Vncoq6eGsr3yCJYTvxZQLNM/3wxCvUJPLJcYbKgIZUNZbvC8ovFG7ChAk
-        G0V+Bw726eiiHGCMFAkz42f3/T+wxMdIAm2SKunT3OTyO9/6SCuJflPMB9/kPQRE
-        yxH2H5FdW2p+qC2o2T5pgslmPkaJ7qck5JsgwoOgvwzhAgMBAAGjQjBAMA4GA1Ud
-        DwEB/wQEAwICBDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBRtxNC8UAR7mXjC
-        fXOV58kmMg7T8zANBgkqhkiG9w0BAQsFAAOCAQEAAJHer6jqoPGMEdjRSBxgW7yw
-        DPU210ffOmWWuqGAHCbuAhcVZG5dce9KjTzKc/sWqI0qR3zrZhMpP06cce2NIsHr
-        VbViVgPT0/K4oNP4l4BBaseLKNgfywOSUtmTtwyKbQJTHElwFwbMzBZF9kihZMah
-        l0zhm5JizXwmBsE38r3+soS9mIvjASGcGp7exTftPyMP8xMuBUvg28Z9w8wxfHv4
-        oZ/yor2Cp4bdGDGQvwKt/WqXfxIk4LW5jKUupoZ+2kkl8eYEE314PFIhayWcTrIf
-        bnDp6Qq8bRQ6acz6CI5AaZROUQmRYmN8Aaz3THJmkfGcejzvbYux/GiD7Nxlkw==
-        -----END CERTIFICATE-----
+ClientConfig config = new ClientConfig();
+config.getNetworkConfig().addAddress("10.96.184.178");
 ----
+--
+
+NodeJS::
++
+--
+[source, javascript]
+----
+const { Client } = require('hazelcast-client');
+
+const clientConfig = {
+    network: {
+        clusterMembers: [
+            'hz-hazelcast'
+        ]
+    }
+};
+const client = await Client.newHazelcastClient(clientConfig);
+----
+--
+
+====
 
 === Run Hazelcast Client application
 
 You can run the client application with the following command.
 
+[tabs]
+====
+
+Java::
++
 [source, shell script]
 ----
-mvn spring-boot:run
+mvn -f java/pom.xml package
+java -jar java/target/*jar-with-dependencies*.jar
 ----
+--
+
+NodeJS::
++
+--
+[source, javascript]
+----
+const { Client } = require('hazelcast-client');
+
+const clientConfig = {
+    network: {
+        clusterMembers: [
+            'hz-hazelcast'
+        ]
+    }
+};
+const client = await Client.newHazelcastClient(clientConfig);
+----
+--
+
+====
 
 Application is a web service that uses Hazelcast Client to connect to the Hazelcast cluster.
 To check it works correctly, you can execute the following commands:
