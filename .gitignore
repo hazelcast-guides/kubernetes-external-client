@@ -114,3 +114,12 @@ Temporary Items
 .apdisk
 
 /.idea/
+
+
+.classpath
+.project
+.settings
+
+*.iml
+.name
+.idea
