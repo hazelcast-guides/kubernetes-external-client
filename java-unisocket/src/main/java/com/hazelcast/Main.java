@@ -10,7 +10,7 @@ import com.hazelcast.map.IMap;
 public class Main {
     public static void main(String[] args) throws Exception {
         ClientConfig config = new ClientConfig();
-        config.getNetworkConfig().addAddress("35.230.44.33")
+        config.getNetworkConfig().addAddress("<EXTERNAL-IP>")
                                  .setSmartRouting(false);
         HazelcastInstance client = HazelcastClient.newHazelcastClient(config);
 
