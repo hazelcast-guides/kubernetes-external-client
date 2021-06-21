@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ClientConfig config = new ClientConfig();
         config.getNetworkConfig().addAddress("<EXTERNAL-IP>")
-                                 .setSmartRouting(false);
+                .setSmartRouting(false);
         HazelcastInstance client = HazelcastClient.newHazelcastClient(config);
 
         System.out.println("Successful connection!");
@@ -22,10 +22,7 @@ public class Main {
         while (true) {
             int randomKey = random.nextInt(100_000);
             map.put("key-" + randomKey, "value-" + randomKey);
-            if (randomKey % 10 == 0) {
-                System.out.println("Current map size: " + map.size());
-                Thread.sleep(1000);
-            }
+            System.out.println("Current map size: " + map.size());
         }
     }
 }
