@@ -73,18 +73,15 @@ jobs:
         kubectl wait --for=condition=ready pod/hz-hazelcast-2 --timeout=120s
 
     - name: Wait for external IP to get assigned
-      shell: bash
-      run: |-
-        while [ $(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}") == "" ]; do
-          sleep 10
-        done
-    
-    - name: Fetch Load Balancer IP
       run: |-
         EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
+        while [ "$EXTERNAL_IP" == "" ]; do
+          sleep 10
+          EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
+        done
+
         echo ${EXTERNAL_IP}
         echo "EXTERNAL_IP=${EXTERNAL_IP}" >> $GITHUB_ENV
-
 
     - name: Test Java Client
       run: |-
