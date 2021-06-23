@@ -80,24 +80,20 @@ jobs:
           EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
         done
 
-        echo ${EXTERNAL_IP}
         echo "EXTERNAL_IP=${EXTERNAL_IP}" >> $GITHUB_ENV
 
     - name: Test Java Client
       run: |-
-        echo "${{ env.EXTERNAL_IP }}"
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd java
-        echo $EXTERNAL_IP
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" src/main/java/com/hazelcast/Main.java
-        cat src/main/java/com/hazelcast/Main.java
         mvn package
         java -jar target/*jar-with-dependencies*.jar >> output-java.txt &
         PID=$!
         sleep 10
         kill $PID
 
-        cat output-java.txt | grep 'Successful connection!' -q
+        cat output-java.txt | grep 'LaLaLa!' -q
 
     # Clean up
     - name: Delete cluster
