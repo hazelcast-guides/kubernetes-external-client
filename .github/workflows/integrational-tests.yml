@@ -79,10 +79,14 @@ jobs:
         done
     
     - name: Fetch Load Balancer IP
-      run: kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}" >> $EXTERNAL_IP
+      run: |-
+        EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
+        echo "EXTERNAL_IP=${EXTERNAL_IP}" >> $GITHUB_ENV
+
 
     - name: Test Java Client
       run: |-
+        EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd java
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" src/main/java/com/hazelcast/Main.java
         mvn package
