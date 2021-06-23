@@ -241,7 +241,7 @@ kubectl create service loadbalancer hz-hazelcast --tcp=5701 -o yaml --dry-run=cl
 ----
 --
 
-Metacontroller::
+Helm and Metacontroller::
 +
 --
 - Install Metacontroller plugin
@@ -272,14 +272,22 @@ kubectl create configmap service-per-pod-hooks -n metacontroller --from-file=hoo
 kubectl apply -f service-per-pod.yaml
 ----
 
-This Decorator Controller automatically creates a service for each POD marked with the following annotations, so you need to add these annotations to your running Hazelcast pods.
-[source, yaml]
+This Decorator Controller automatically creates a service for each POD marked with the specific annotations, so you can start Hazelcast cluster using the following Helm command.
+[source, bash]
 ----
-annotations:
-    service-per-pod-label: "statefulset.kubernetes.io/pod-name"
-    service-per-pod-ports: "5701:5701"
+helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
+helm repo update
+helm install hz-hazelcast \
+     --set service.type=LoadBalancer \
+     --set annotations.service-per-pod-label=statefulset.kubernetes.io/pod-name,annotations.service-per-pod-ports="5701:5701" \
+     hazelcast/hazelcast
 ----
 --
+====
+
+[NOTE]
+====
+Note that each service created per pod must start before Hazelcast itself. Otherwise Hazelcast won't be able to resolve its public addresses.
 ====
 
 ==== Verifying Hazelcast cluster
@@ -308,7 +316,7 @@ hz-hazelcast-1   LoadBalancer   10.219.241.203   34.82.71.106     5701:30687/TCP
 hz-hazelcast-2   LoadBalancer   10.219.247.106   35.247.93.190    5701:32452/TCP   4m4s
 ----
 
-Additionally, there is one service which we'll use for discovery.
+We'll use the `hz-hazelcast` service for the discovery.
 
 [source, bash]
 ----
@@ -411,12 +419,20 @@ kubectl delete -f https://raw.githubusercontent.com/hazelcast/hazelcast-kubernet
 ----
 --
 
-Helm::
+Helm and Metacontroller::
 +
 --
 [source, bash]
 ----
 helm uninstall hz-hazelcast
+
+kubectl delete -f service-per-pod.yaml
+kubectl delete configmap service-per-pod-hooks -n metacontroller
+
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
+kubectl delete namespace metacontroller
 ----
 =====
 

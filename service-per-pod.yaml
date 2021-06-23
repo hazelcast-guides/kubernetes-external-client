@@ -4,8 +4,8 @@ metadata:
   name: service-per-pod
 spec:
   resources:
-  - apiVersion: apps/v1
-    resource: statefulsets
+  - apiVersion: v1
+    resource: pods
     annotationSelector:
       matchExpressions:
       - {key: service-per-pod-label, operator: Exists}
