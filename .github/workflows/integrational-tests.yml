@@ -100,7 +100,7 @@ jobs:
         mvn package
         java -jar target/*jar-with-dependencies*.jar >> output-java.txt &
         PID=$!
-        sleep 15
+        sleep 10
         kill $PID
 
         cat output-java.txt | grep 'Successful connection!' -q
@@ -113,7 +113,7 @@ jobs:
         npm install
         npm start >> output-nodejs.txt &
         PID=$!
-        sleep 15
+        sleep 10
         kill $PID
 
         cat output-nodejs.txt | grep 'Successful connection!' -q
@@ -126,7 +126,7 @@ jobs:
         go get github.com/hazelcast/hazelcast-go-client@v1.0.0-preview.4
         go run main.go >> output-go.txt &
         PID=$!
-        sleep 15
+        sleep 10
         kill $PID
 
         cat output-go.txt | grep 'Successful connection!' -q
