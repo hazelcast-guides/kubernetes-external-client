@@ -74,7 +74,7 @@ jobs:
 
     - name: Wait for external IP to get assigned
       run: |-
-        while [ $(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")="" ]; do
+        while [ $(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}") = "" ]; do
           sleep 10
         done
     
