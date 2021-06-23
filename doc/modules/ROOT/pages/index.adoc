@@ -111,7 +111,7 @@ The field `EXERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
 
-Configure the Hazelcast client to connect to the cluster external address and disable smart routing (use unisocket connection).
+Configure the Hazelcast client with the external address and disable smart routing (use the unisocket connection).
 
 [tabs]
 ====
@@ -137,7 +137,7 @@ const { Client } = require('hazelcast-client');
 const clientConfig = {
     network: {
         clusterMembers: [
-            'hz-hazelcast'
+            '<EXTERNAL-IP>'
         ],
         smartRouting: false
     }
@@ -181,7 +181,7 @@ Java::
 [source, bash]
 ----
 cd java-unisocket
-mvn package
+mvn package 
 java -jar target/*jar-with-dependencies*.jar
 ----
 --
@@ -237,8 +237,7 @@ helm uninstall hz-hazelcast
 ----
 =====
 
-
-Unisocket is very simple to configure; however, it has one significant drawback—low performance. Using a load balancer is perfect for traffic distribution across stateless services; however, Hazelcast is not stateless. Actually, Hazelcast is more like a sharded database in which each member contains a different part of the data. That is why it’s suboptimal to randomly load balance the traffic. It effectively means that each operation needs to be internally migrated, because your data may be load balanced to member 1, while the partition for its key is stored in member 2. All in all, if performance is important for your use case, then you need to use smart client.
+Unisocket is very simple to configure; however, it has one significant drawback - low performance. Using a load balancer is perfect for traffic distribution across stateless services; however, Hazelcast is not stateless. Actually, Hazelcast is more like a sharded database in which each member contains a different part of the data. That is why it’s suboptimal to randomly load balance the traffic. It effectively means that each operation needs to be internally migrated, because your data may be load balanced to member 1, while the partition for its key is stored in member 2. All in all, if performance is important for your use case, then you need to use smart client.
 
 == Smart Client
 
@@ -255,7 +254,7 @@ Kubectl::
 +
 --
 
-To create a `loadbalancer` for each running Hazelcast pod you need to run the following command:
+To create a `loadbalancer` for each running Hazelcast pod you need to run the following commands:
 
 [source, bash]
 ----
@@ -335,7 +334,6 @@ hz-hazelcast-2   1/1     Running   0          29s
 ----
 
 At this point, you should also have every Hazelcast member exposed with a separate externally accessible address.
-
 
 [source, bash]
 ----
@@ -495,224 +493,7 @@ kubectl delete namespace metacontroller
 ----
 =====
 
-
-[NOTE]
-====
-If you are using Minikube, you need to execute minikube tunnel now in order to get LoadBalancer External IPs assigned.
-====
-
-The field `EXERNAL-IP` is the address of your Hazelcast cluster.
-
-[NOTE]
-====
-At this point you can already start using your Hazelcast cluster externally with the Unisocket Client (`smart-routing: false`), however it means lower performance. To achieve the best performance, use Smart Client as described below.
-====
-
-=== Expose each Hazelcast Member
-
-To use Hazelcast Smart Client, every Hazelcast member needs to be accessible with a separate external address. In Kubernetes PODs can be accessed from outside only via services, so the configuration requires creating a separate service (LoadBalancer or NodePort) for each Hazelcast member POD. This can be done manually or using https://metacontroller.app/[Metacontroller] plugin with https://github.com/metacontroller/metacontroller/tree/master/examples/service-per-pod[Service-Per-Pod] Decorator Controller.
-
-[tabs]
-====
-Manual::
-+
---
-
-To create a `loadbalancer` for each running Hazelcast pod you need to run the following command:
-
-[source, shell script]
-----
-for pod in $(kubectl get pods --selector=role=hazelcast -o jsonpath="{.items[*].metadata.name}"); do \
-  kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "name=${pod}" -o yaml | kubectl create -f -; \
-done
-----
---
-
-Metacontroller::
-+
---
-- Install Metacontroller plugin
-
-To install https://metacontroller.app/[Metacontroller] plugin, execute the following commands:
-
-[source, shell script]
-----
-# Create metacontroller namespace.
-kubectl create namespace metacontroller
-# Create metacontroller service account and role/binding.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
-# Create CRDs for Metacontroller APIs
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
-# Create Metacontroller StatefulSet.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
-----
-
-If you have any issues while creating Metacontroller, it may mean that you don't have ClusterRole access to your cluster. Please check https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#defining_permissions_in_a_role[this] for details.
-
-- Install Service-Per-Pod DecoratorController
-
-To install Service-Per-Pod Decorator Controller, you need to execute the following commands.
-
-[source, shell script]
-----
-kubectl create configmap service-per-pod-hooks -n metacontroller --from-file=hooks
-kubectl apply -f service-per-pod.yaml
-----
-
-This Decorator Controller automatically creates a service for each POD marked with the following annotations, so you need to add these annotations to your running Hazelcast pods.
-[source, yaml]
-----
-annotations:
-    service-per-pod-label: "statefulset.kubernetes.io/pod-name"
-    service-per-pod-ports: "5701:5701"
-----
---
-====
-
-Check the services were created with by running the command:
-
-[source, shell script]
-----
-$ kubectl get svc
-NAME             TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)          AGE
-hz-hazelcast     LoadBalancer   10.108.141.178   10.96.184.178   5701:30915/TCP   11m
-hz-hazelcast-0   LoadBalancer   10.175.248.67    35.195.77.97    5701:30915/TCP   11m
-hz-hazelcast-1   LoadBalancer   10.175.254.105   104.155.70.30   5701:30440/TCP   11m
-hz-hazelcast-2   LoadBalancer   10.175.253.232   34.78.182.50    5701:30305/TCP   11m
-----
-
-== Configure Hazelcast Client outside Kubernetes
-
-When we have a working Hazelcast cluster deployed on Kubernetes, we can connect to it with an external Hazelcast Smart Client.
-
-To use Hazelcast client, add Hazelcast client dependency to your application.
-
-[tabs]
-====
-
-Java::
-+
---
-.pom.xml
-[source, xml]
-----
-<dependency>
-    <groupId>com.hazelcast</groupId>
-    <artifactId>hazelcast</artifactId>
-    <version>${hazelcast.version}</version>
-</dependency>
-----
---
-
-NodeJS::
-+
---
-[source, bash]
-----
-npm install hazelcast-client
-----
---
-====
-
-Check again the EXTERNAL-IP (or `NODE-IP:NODE_PORT` in case of using NodePort services) of your LoadBalancer service.
-
-[source, bash]
-----
-kubectl get service hz-hazelcast
-NAME           TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)          AGE
-hz-hazelcast   LoadBalancer   10.108.141.178   10.96.184.178     5701:31434/TCP   5m44s
-----
-
-Configure the Hazelcast client in your application to connect to the your cluster using `EXTERNAL-IP` (or `NODE-IP:NODE_PORT` in case of using NodePort services).
-
-[tabs]
-====
-
-Java::
-+
---
-[source, java]
-----
-ClientConfig config = new ClientConfig();
-config.getNetworkConfig().addAddress("10.96.184.178");
-----
---
-
-NodeJS::
-+
---
-[source, javascript]
-----
-const { Client } = require('hazelcast-client');
-
-const clientConfig = {
-    network: {
-        clusterMembers: [
-            'hz-hazelcast'
-        ]
-    }
-};
-const client = await Client.newHazelcastClient(clientConfig);
-----
---
-
-====
-
-=== Run Hazelcast Client application
-
-You can run the client application with the following command.
-
-[tabs]
-====
-
-Java::
-+
-[source, shell script]
-----
-mvn -f java/pom.xml package
-java -jar java/target/*jar-with-dependencies*.jar
-----
---
-
-NodeJS::
-+
---
-[source, javascript]
-----
-const { Client } = require('hazelcast-client');
-
-const clientConfig = {
-    network: {
-        clusterMembers: [
-            'hz-hazelcast'
-        ]
-    }
-};
-const client = await Client.newHazelcastClient(clientConfig);
-----
---
-
-====
-
-Application is a web service that uses Hazelcast Client to connect to the Hazelcast cluster.
-To check it works correctly, you can execute the following commands:
-
-[source, shell script]
-----
-$ curl "localhost:8080/put?key=some-key&value=some-value"
-{"response":null}
-
-$ curl "localhost:8080/get?key=some-key"
-{"response":"some-value"}
-----
-
-You can also check the application logs to see:
-
-[source, shell script]
-----
-Members [3] {
-	Member [10.172.2.8]:5701 - 77fb7da6-79bd-4b5b-9c63-2c425a111c06
-	Member [10.172.0.4]:5701 - d63bd9f6-7afd-4b9b-88d3-f3b6afb749f9
-	Member [10.172.0.5]:5701 - 049fe137-9cfd-4be8-80a3-d1357a31f6f4
-}
-----
+== See Also
+- xref:kubernetes:ROOT:index.adoc[Hazelcast for Kubernetes]
+- xref:kubernetes-hpa:ROOT:index.adoc[Kubernetes HPA for Hazelcast cluster]
+- xref:kubernetes-sidecar:ROOT:index.adoc[Hazelcast as Sidecar container]
