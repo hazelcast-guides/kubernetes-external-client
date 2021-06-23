@@ -123,3 +123,6 @@ Temporary Items
 *.iml
 .name
 .idea
+
+node_modules/
+package-lock.json

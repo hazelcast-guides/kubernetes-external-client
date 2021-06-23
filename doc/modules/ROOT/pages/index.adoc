@@ -138,7 +138,8 @@ const clientConfig = {
     network: {
         clusterMembers: [
             'hz-hazelcast'
-        ]
+        ],
+        smartRouting: false
     }
 };
 const client = await Client.newHazelcastClient(clientConfig);
@@ -153,7 +154,7 @@ Finally, start the client application using the following command.
 
 Java::
 +
-[source, shell script]
+[source, bash]
 ----
 mvn -f java-unisocket/pom.xml package
 java -jar java-unisocket/target/*jar-with-dependencies*.jar
@@ -163,18 +164,10 @@ java -jar java-unisocket/target/*jar-with-dependencies*.jar
 NodeJS::
 +
 --
-[source, javascript]
+[source, bash]
 ----
-const { Client } = require('hazelcast-client');
-
-const clientConfig = {
-    network: {
-        clusterMembers: [
-            'hz-hazelcast'
-        ]
-    }
-};
-const client = await Client.newHazelcastClient(clientConfig);
+npm --prefix nodejs-unisocket install
+npm --prefix nodejs-unisocket start
 ----
 --
 ====
@@ -359,7 +352,7 @@ const { Client } = require('hazelcast-client');
 const clientConfig = {
     network: {
         clusterMembers: [
-            'hz-hazelcast'
+            '<EXERNAL-IP>'
         ]
     }
 };
@@ -375,7 +368,7 @@ Finally, start the client application using the following command.
 
 Java::
 +
-[source, shell script]
+[source, bash]
 ----
 mvn -f java/pom.xml package
 java -jar java/target/*jar-with-dependencies*.jar
@@ -385,18 +378,10 @@ java -jar java/target/*jar-with-dependencies*.jar
 NodeJS::
 +
 --
-[source, javascript]
+[source, bash]
 ----
-const { Client } = require('hazelcast-client');
-
-const clientConfig = {
-    network: {
-        clusterMembers: [
-            'hz-hazelcast'
-        ]
-    }
-};
-const client = await Client.newHazelcastClient(clientConfig);
+npm --prefix nodejs install
+npm --prefix nodejs start
 ----
 --
 ====
