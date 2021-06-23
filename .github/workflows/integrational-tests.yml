@@ -86,9 +86,12 @@ jobs:
 
     - name: Test Java Client
       run: |-
+        echo "${{ env.EXTERNAL_IP }}"
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd java
+        echo $EXTERNAL_IP
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" src/main/java/com/hazelcast/Main.java
+        cat src/main/java/com/hazelcast/Main.java
         mvn package
         java -jar target/*jar-with-dependencies*.jar >> output-java.txt &
         PID=$!
