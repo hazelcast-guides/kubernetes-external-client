@@ -21,6 +21,7 @@ In this guide you will learn how to deploy Hazelcast Kubernetes cluster and conn
 == Configure Hazelcast cluster on Kubernetes
 
 There are two approaches you may want to use when setting up on-premises Hazelcast cluster in Kubernetes:
+
 * **Unisocket Client** - client sends requests to a random Hazelcast member
 * **Smart Client** - client connects to all members and sends requests directly to the right members
 
@@ -65,7 +66,9 @@ helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
 helm repo update
 helm install hz-hazelcast --set service.type=LoadBalancer hazelcast/hazelcast
 ----
-=====
+--
+
+====
 
 ==== Verifying Hazelcast cluster
 
@@ -104,14 +107,14 @@ hz-hazelcast   LoadBalancer   10.108.141.178   10.96.184.178     5701:31434/TCP 
 
 [NOTE]
 ====
-If you are using Minikube, you need to execute minikube tunnel now in order to get LoadBalancer External IPs assigned.
+If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
 ====
 
 The field `EXERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
 
-Configure the Hazelcast client with the external address and disable smart routing (use the unisocket connection).
+Configure the Hazelcast client with the external address and disable smart routing to use the unisocket connection.
 
 [tabs]
 ====
@@ -235,7 +238,7 @@ Helm::
 ----
 helm uninstall hz-hazelcast
 ----
-=====
+====
 
 Unisocket is very simple to configure; however, it has one significant drawback - low performance. Using a load balancer is perfect for traffic distribution across stateless services; however, Hazelcast is not stateless. Actually, Hazelcast is more like a sharded database in which each member contains a different part of the data. That is why it’s suboptimal to randomly load balance the traffic. It effectively means that each operation needs to be internally migrated, because your data may be load balanced to member 1, while the partition for its key is stored in member 2. All in all, if performance is important for your use case, then you need to use smart client.
 
@@ -302,7 +305,10 @@ kubectl create configmap service-per-pod-hooks -n metacontroller --from-file=hoo
 kubectl apply -f service-per-pod.yaml
 ----
 
-This Decorator Controller automatically creates a service for each POD marked with the specific annotations, so you can start Hazelcast cluster using the following Helm command.
+This Decorator Controller automatically creates a service for each POD marked with the specific annotations.
+
+- Start Hazelcast cluster
+
 [source, bash]
 ----
 helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
@@ -356,7 +362,7 @@ hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5
 
 [NOTE]
 ====
-If you are using Minikube, you need to execute minikube tunnel now in order to get LoadBalancer External IPs assigned.
+If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
 ====
 
 The field `EXERNAL-IP` is the address of your Hazelcast cluster.
@@ -491,7 +497,8 @@ kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontrolle
 kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
 kubectl delete namespace metacontroller
 ----
-=====
+--
+====
 
 == See Also
 - xref:kubernetes:ROOT:index.adoc[Hazelcast for Kubernetes]
