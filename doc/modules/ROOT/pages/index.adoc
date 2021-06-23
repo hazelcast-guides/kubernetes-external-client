@@ -145,6 +145,30 @@ const clientConfig = {
 const client = await Client.newHazelcastClient(clientConfig);
 ----
 --
+
+Go::
++
+--
+[source, go]
+----
+import (
+	"log"
+
+	"github.com/hazelcast/hazelcast-go-client"
+)
+
+func main() {
+    config := hazelcast.NewConfig()
+	config.ClusterConfig.SetAddress("<EXTERNAL-IP>:5701")
+    config.ClusterConfig.SmartRouting = false
+	client, err := hazelcast.StartNewClientWithConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+----
+--
+
 ====
 
 Finally, start the client application using the following command.
@@ -156,8 +180,9 @@ Java::
 +
 [source, bash]
 ----
-mvn -f java-unisocket/pom.xml package
-java -jar java-unisocket/target/*jar-with-dependencies*.jar
+cd java-unisocket
+mvn package
+java -jar target/*jar-with-dependencies*.jar
 ----
 --
 
@@ -166,10 +191,23 @@ NodeJS::
 --
 [source, bash]
 ----
-npm --prefix nodejs-unisocket install
-npm --prefix nodejs-unisocket start
+cd nodejs-unisocket
+npm install
+npm start
 ----
 --
+
+Go::
++
+--
+[source, bash]
+----
+cd go-unisocket
+go get github.com/hazelcast/hazelcast-go-client@v1.0.0-preview.4
+go run main.go
+----
+--
+
 ====
 
 === Clean Up
@@ -359,6 +397,28 @@ const clientConfig = {
 const client = await Client.newHazelcastClient(clientConfig);
 ----
 --
+
+Go::
++
+--
+[source, go]
+----
+import (
+	"log"
+
+	"github.com/hazelcast/hazelcast-go-client"
+)
+
+func main() {
+    config := hazelcast.NewConfig()
+	config.ClusterConfig.SetAddress("<EXTERNAL-IP>:5701")
+	client, err := hazelcast.StartNewClientWithConfig(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+----
+--
 ====
 
 Finally, start the client application using the following command.
@@ -370,8 +430,9 @@ Java::
 +
 [source, bash]
 ----
-mvn -f java/pom.xml package
-java -jar java/target/*jar-with-dependencies*.jar
+cd java
+mvn package
+java -jar target/*jar-with-dependencies*.jar
 ----
 --
 
@@ -380,10 +441,23 @@ NodeJS::
 --
 [source, bash]
 ----
-npm --prefix nodejs install
-npm --prefix nodejs start
+cd nodejs
+npm install
+npm start
 ----
 --
+
+Go::
++
+--
+[source, bash]
+----
+cd go
+go get github.com/hazelcast/hazelcast-go-client@v1.0.0-preview.4
+go run main.go
+----
+--
+
 ====
 
 === Clean Up
