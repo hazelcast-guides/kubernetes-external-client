@@ -365,7 +365,7 @@ hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5
 If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
 ====
 
-The field `EXERNAL-IP` is the address of your Hazelcast cluster.
+The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
 
