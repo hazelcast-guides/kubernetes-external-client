@@ -31,7 +31,7 @@ jobs:
       with:
         java-version: 1.8
     
-    - name: Set up NodeJS
+    - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '14'
@@ -105,7 +105,7 @@ jobs:
 
         cat output-java.txt | grep 'Successful connection!' -q
 
-    - name: Test NodeJS Client
+    - name: Test Node.js Client
       run: |-
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd nodejs

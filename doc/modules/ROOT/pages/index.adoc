@@ -23,7 +23,7 @@ In this guide you will learn how to deploy Hazelcast Kubernetes cluster and conn
 There are two approaches you may want to use when setting up on-premises Hazelcast cluster in Kubernetes:
 
 * **Unisocket Client** - client sends requests to a random Hazelcast member
-* **Smart Client** - client connects to all members and sends requests directly to the right members
+* **Smart Client** - client connects to all members and sends requests directly to the members owning the data
 
 Let's see both approaches.
 
@@ -83,7 +83,7 @@ hz-hazelcast-1   1/1     Running   0          30s
 hz-hazelcast-2   1/1     Running   0          29s
 ----
 
-You can also check that all Hazelcast members formed one cluster.
+You can also check that all Hazelcast members formed a cluster.
 
 [source, bash]
 ----
@@ -110,7 +110,7 @@ hz-hazelcast   LoadBalancer   10.108.141.178   10.96.184.178     5701:31434/TCP 
 If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
 ====
 
-The field `EXERNAL-IP` is the address of your Hazelcast cluster.
+The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
 
