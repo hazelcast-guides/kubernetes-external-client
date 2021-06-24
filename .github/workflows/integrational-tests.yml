@@ -105,7 +105,7 @@ jobs:
 
         cat output-java.txt | grep 'Successful connection!' -q
 
-    - name: Test NodeJS Client
+    - name: Test Node.js Client
       run: |-
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd nodejs
