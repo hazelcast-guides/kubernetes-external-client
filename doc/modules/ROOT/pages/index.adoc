@@ -83,7 +83,7 @@ hz-hazelcast-1   1/1     Running   0          30s
 hz-hazelcast-2   1/1     Running   0          29s
 ----
 
-You can also check that all Hazelcast members formed one cluster.
+You can also check that all Hazelcast members formed a cluster.
 
 [source, bash]
 ----
