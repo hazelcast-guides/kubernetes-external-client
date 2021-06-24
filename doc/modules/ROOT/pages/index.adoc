@@ -263,7 +263,7 @@ Unisocket is very simple to configure; however, it has one significant drawback 
 
 == Smart Client
 
-Hazelcast smart client stores the mapping from key to member, which means that it sends the data directly to the member which contains the right data partition. This fact implies that in the Kubernetes environment, we need to provide access to each Hazelcast pod from the outside. A dynamic approach to this problem is to expose each pod with a separate service. Again, the service can be either `LoadBalancer` or `NodePort`. In a real-life scenario, that would probably be `NodePort`, since having a separate public IP for each pod is expensive.
+Hazelcast smart client is capable of mapping the given key with its owner member, which means that it sends the data directly to the member which contains the right data partition. This fact implies that in the Kubernetes environment, we need to provide access to each Hazelcast pod from the outside. A dynamic approach to this problem is to expose each pod with a separate service. Again, the service can be either `LoadBalancer` or `NodePort`. In a real-life scenario, that would probably be `NodePort`, since having a separate public IP for each pod is expensive.
 
 .Hazelcast Smart Client
 image::smart.jpg[Hazelcast Smart Client]
@@ -384,7 +384,7 @@ hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5
 If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
 ====
 
-The field `EXERNAL-IP` is the address of your Hazelcast cluster.
+The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
 
@@ -413,7 +413,7 @@ const { Client } = require('hazelcast-client');
 const clientConfig = {
     network: {
         clusterMembers: [
-            '<EXERNAL-IP>'
+            '<EXTERNAL-IP>'
         ]
     }
 };
