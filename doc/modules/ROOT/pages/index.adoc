@@ -161,12 +161,13 @@ import (
 )
 
 func main() {
-    config := hazelcast.NewConfig()
-	config.ClusterConfig.SetAddress("<EXTERNAL-IP>:5701")
-    config.ClusterConfig.SmartRouting = false
+	config := hazelcast.NewConfig()
+	cc := &config.ClusterConfig
+	cc.SetAddress("<EXTERNAL-IP>:5701")
+	cc.SmartRouting = false
 	client, err := hazelcast.StartNewClientWithConfig(config)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 ----
@@ -206,12 +207,30 @@ Go::
 [source, bash]
 ----
 cd go-unisocket
-go get github.com/hazelcast/hazelcast-go-client@v1.0.0-preview.4
 go run main.go
 ----
 --
 
 ====
+
+You should see the following output.
+
+[source, shell script]
+----
+Successful connection!
+Starting to fill the map with random entries.
+Current map size: 2
+Current map size: 3
+Current map size: 4
+Current map size: 5
+Current map size: 6
+Current map size: 7
+Current map size: 8
+Current map size: 9
+Current map size: 10
+----
+
+
 
 === Clean Up
 
@@ -414,11 +433,12 @@ import (
 )
 
 func main() {
-    config := hazelcast.NewConfig()
-	config.ClusterConfig.SetAddress("<EXTERNAL-IP>:5701")
+	config := hazelcast.NewConfig()
+	cc := &config.ClusterConfig
+	cc.SetAddress("<EXTERNAL-IP>:5701")
 	client, err := hazelcast.StartNewClientWithConfig(config)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 ----
@@ -457,12 +477,28 @@ Go::
 [source, bash]
 ----
 cd go
-go get github.com/hazelcast/hazelcast-go-client@v1.0.0-preview.4
 go run main.go
 ----
 --
 
 ====
+
+You should see the following output.
+
+[source, shell script]
+----
+Successful connection!
+Starting to fill the map with random entries.
+Current map size: 2
+Current map size: 3
+Current map size: 4
+Current map size: 5
+Current map size: 6
+Current map size: 7
+Current map size: 8
+Current map size: 9
+Current map size: 10
+----
 
 === Clean Up
 

@@ -10,7 +10,8 @@ import (
 
 func main() {
 	config := hazelcast.NewConfig()
-	config.ClusterConfig.SetAddress("<EXTERNAL-IP>:5701")
+	cc := &config.ClusterConfig
+	cc.SetAddress("<EXTERNAL-IP>:5701")
 	client, err := hazelcast.StartNewClientWithConfig(config)
 	if err != nil {
 		panic(err)
