@@ -18,7 +18,7 @@ In this guide you will learn how to deploy Hazelcast Kubernetes cluster and conn
 * Up and running https://kubernetes.io/[Kubernetes] cluster (https://minikube.sigs.k8s.io/docs/[Minikube] is good enough)
 * Kubernetes command line tool, https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubectl]
 
-== Configure Hazelcast cluster on Kubernetes
+== Introduction
 
 There are two approaches you may want to use when setting up on-premises Hazelcast cluster in Kubernetes:
 
@@ -27,14 +27,14 @@ There are two approaches you may want to use when setting up on-premises Hazelca
 
 Let's see both approaches.
 
-=== Unisocket Client
+== Unisocket Client
 
 The simplest possible scenario is to deploy the Hazelcast cluster on Kubernetes and expose all Hazelcast pods with one `LoadBalancer` (or `NodePort`) service. With that approach, we piggyback on the standard Kubernetes mechanism, which automatically load balances the traffic to Hazelcast members.
 
 .Hazelcast Unisocket Client
 image::unisocket.jpg[Hazelcast Unisocket Client]
 
-==== Starting Hazelcast cluster
+=== Starting Hazelcast cluster
 
 There are different ways of deploying Hazelcast to Kubernetes. For the production environment we recommend using Helm.
 
@@ -70,7 +70,7 @@ helm install hz-hazelcast --set service.type=LoadBalancer hazelcast/hazelcast
 
 ====
 
-==== Verifying Hazelcast cluster
+=== Verifying Hazelcast cluster
 
 You can check that the Hazelcast cluster is up and running.
 
@@ -346,7 +346,7 @@ helm install hz-hazelcast \
 Note that each service created per pod must start before the Hazelcast pod itself. Otherwise Hazelcast won't be able to resolve its public addresses.
 ====
 
-==== Verifying Hazelcast cluster
+=== Verifying Hazelcast cluster
 
 You can check that the Hazelcast cluster is up and running.
 
