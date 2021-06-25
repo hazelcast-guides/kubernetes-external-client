@@ -182,6 +182,7 @@ Finally, start the client application using the following command.
 
 Java::
 +
+--
 [source, bash]
 ----
 cd java-unisocket
@@ -452,6 +453,7 @@ Finally, start the client application using the following command.
 
 Java::
 +
+--
 [source, bash]
 ----
 cd java
