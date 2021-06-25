@@ -342,7 +342,7 @@ helm install hz-hazelcast \
 
 [NOTE]
 ====
-Note that each service created per pod must start before Hazelcast itself. Otherwise Hazelcast won't be able to resolve its public addresses.
+Note that each service created per pod must start before the Hazelcast pod itself. Otherwise Hazelcast won't be able to resolve its public addresses.
 ====
 
 ==== Verifying Hazelcast cluster
