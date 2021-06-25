@@ -7,7 +7,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_ZONE: europe-west1-b
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+  HAZELCAST_VERSION: 4.2
 
 jobs:
   run-tests:
@@ -29,64 +29,102 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Set up Golang
+      uses: actions/setup-go@v2
+      with:
+        go-version: '^1.13.1'
 
     # Setup gcloud CLI
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@0.1.3
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1
       with:
         service_account_key: ${{ secrets.GKE_SA_KEY }}
         project_id: ${{ env.PROJECT_ID }}
         export_default_credentials: true 
 
-    - run: |-
+    - name: Install Kubectl
+      run: |-
         gcloud components install kubectl
 
-    - run: |-
+    - name: Create GKE cluster
+      run: |-
         repoName=$(echo $GITHUB_REPOSITORY | awk -F/ '{print $NF}')
         clusterName="$repoName-$GITHUB_RUN_NUMBER"
         echo "clusterName=$clusterName" >> $GITHUB_ENV
         gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
-
-    - run: |-
-        gcloud container clusters get-credentials --region="$GKE_ZONE" "$clusterName"
-
-    - run: |-
-        kubectl config use-context $(kubectl config get-contexts -o name)
-
-    - name: Apply RBAC
-      run: |-
-        kubectl apply -f rbac.yaml
+        sleep 30
 
     - name: Deploy Hazelcast cluster
       run: |-
-        kubectl apply -f hazelcast-cluster.yaml
+        kubectl apply -f https://raw.githubusercontent.com/hazelcast/hazelcast-kubernetes/master/rbac.yaml
+
+        kubectl create service loadbalancer hz-hazelcast-0 --tcp=5701
+        kubectl run hz-hazelcast-0 --image=hazelcast/hazelcast:$HAZELCAST_VERSION --port=5701 -l "app=hz-hazelcast-0,role=hazelcast"
+        kubectl create service loadbalancer hz-hazelcast-1 --tcp=5701
+        kubectl run hz-hazelcast-1 --image=hazelcast/hazelcast:$HAZELCAST_VERSION --port=5701 -l "app=hz-hazelcast-1,role=hazelcast"
+        kubectl create service loadbalancer hz-hazelcast-2 --tcp=5701
+        kubectl run hz-hazelcast-2 --image=hazelcast/hazelcast:$HAZELCAST_VERSION --port=5701 -l "app=hz-hazelcast-2,role=hazelcast"
+
+        kubectl create service loadbalancer hz-hazelcast --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "role=hazelcast" -o yaml | kubectl create -f -
 
     - name: Wait for deployment to finish
       run: |-
-        kubectl wait --for=condition=ready pod/hazelcast-0 --timeout=120s
-        kubectl wait --for=condition=ready pod/hazelcast-1 --timeout=120s
-        kubectl wait --for=condition=ready pod/hazelcast-2 --timeout=120s
+        kubectl wait --for=condition=ready pod/hz-hazelcast-0 --timeout=120s
+        kubectl wait --for=condition=ready pod/hz-hazelcast-1 --timeout=120s
+        kubectl wait --for=condition=ready pod/hz-hazelcast-2 --timeout=120s
 
-    - name: Creating LoadBalancer for each pods
+    - name: Wait for external IP to get assigned
       run: |-
-        for pod in $(kubectl get pods -o jsonpath="{.items[*].metadata.name}"); do \
-          kubectl create service loadbalancer ${pod} --tcp=5701 -o yaml --dry-run | kubectl set selector --local -f - "statefulset.kubernetes.io/pod-name=${pod}" -o yaml | kubectl create -f -; \
-          kubectl label service ${pod} test=true; \
-        done;
+        EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
+        while [ "$EXTERNAL_IP" == "" ]; do
+          sleep 10
+          EXTERNAL_IP=$(kubectl get svc hz-hazelcast --output="jsonpath={.status.loadBalancer.ingress[0].ip}")
+        done
 
-    - name: Fetch k8s master IP
-      id: master-ip
+        echo "EXTERNAL_IP=${EXTERNAL_IP}" >> $GITHUB_ENV
+
+    - name: Test Java Client
       run: |-
-        ip=$(kubectl cluster-info | grep master | awk -Fat '{gsub(/ /, "", $0); print $NF}')
-        echo "masterIp=$ip" >> $GITHUB_ENV
+        EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
+        cd java
+        sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" src/main/java/com/hazelcast/Main.java
+        mvn package
+        java -jar target/*jar-with-dependencies*.jar >> output-java.txt &
+        PID=$!
+        sleep 30
+        kill $PID
 
-    - name: Run Maven tests
+        cat output-java.txt | grep 'Successful connection!' -q
+
+    - name: Test Node.js Client
       run: |-
-        secret=$(kubectl get secret -o name | grep hazelcast)
-        apiToken=$(kubectl get $secret -o jsonpath={.data.token} | base64 --decode | xargs echo)
-        caCertificate=$(kubectl get $secret -o jsonpath='{.data.ca\.crt}' | base64 --decode)
+        EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
+        cd nodejs
+        sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" client.js
+        npm install
+        npm start >> output-nodejs.txt &
+        PID=$!
+        sleep 30
+        kill $PID
 
-        KUBERNETES_MASTER="$masterIp" API_TOKEN=$apiToken CA_CERTIFICATE=$caCertificate mvn test -q
-      timeout-minutes: 10
+        cat output-nodejs.txt | grep 'Successful connection!' -q
+
+    - name: Test Go Client
+      run: |-
+        EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
+        cd go
+        sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" main.go
+        go run main.go >> output-go.txt &
+        PID=$!
+        sleep 30
+        kill $PID
+
+        cat output-go.txt | grep 'Successful connection!' -q
 
     # Clean up
     - name: Delete cluster

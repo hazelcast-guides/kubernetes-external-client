@@ -114,3 +114,15 @@ Temporary Items
 .apdisk
 
 /.idea/
+
+
+.classpath
+.project
+.settings
+
+*.iml
+.name
+.idea
+
+node_modules/
+package-lock.json
