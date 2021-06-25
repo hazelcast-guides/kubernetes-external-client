@@ -47,20 +47,17 @@ jobs:
         project_id: ${{ env.PROJECT_ID }}
         export_default_credentials: true 
 
-    - run: |-
+    - name: Install Kubectl
+      run: |-
         gcloud components install kubectl
 
-    - run: |-
+    - name: Create GKE cluster
+      run: |-
         repoName=$(echo $GITHUB_REPOSITORY | awk -F/ '{print $NF}')
         clusterName="$repoName-$GITHUB_RUN_NUMBER"
         echo "clusterName=$clusterName" >> $GITHUB_ENV
-        gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=3
-
-    - run: |-
-        gcloud container clusters get-credentials --region="$GKE_ZONE" "$clusterName"
-
-    - run: |-
-        kubectl config use-context $(kubectl config get-contexts -o name)
+        gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
+        sleep 30
 
     - name: Deploy Hazelcast cluster
       run: |-
