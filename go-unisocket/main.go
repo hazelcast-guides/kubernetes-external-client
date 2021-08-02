@@ -9,17 +9,17 @@ import (
 )
 
 func main() {
-	config := hazelcast.NewConfig()
-	cc := &config.ClusterConfig
-	cc.SetAddress("<EXTERNAL-IP>:5701")
-	cc.SmartRouting = false
-	client, err := hazelcast.StartNewClientWithConfig(config)
+	config := hazelcast.Config{}
+	cc := &config.Cluster
+	cc.Network.SetAddresses("<EXTERNAL-IP>:5701")
+	cc.Unisocket = true
+	ctx := context.TODO()
+	client, err := hazelcast.StartNewClientWithConfig(ctx, config)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Successful connection!")
 	fmt.Println("Starting to fill the map with random entries.")
-	ctx := context.TODO()
 	m, err := client.GetMap(ctx, "map")
 	if err != nil {
 		panic(err)
