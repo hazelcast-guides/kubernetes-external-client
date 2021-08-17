@@ -1,6 +1,6 @@
 FROM fedora:34
 
-ARG VERSION=4.1.1
+ARG VERSION=4.2
 
 RUN dnf install -y gcc-c++ tar make wget bzip2 unzip cmake which boost-devel
 
