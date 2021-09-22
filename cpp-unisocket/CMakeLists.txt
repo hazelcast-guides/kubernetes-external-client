@@ -27,4 +27,3 @@ find_package(hazelcast-cpp-client REQUIRED)
 add_executable(cpp-unisocket main.cpp)
 
 target_link_libraries(cpp-unisocket PRIVATE hazelcast-cpp-client::hazelcast-cpp-client)
-

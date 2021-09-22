@@ -11,8 +11,9 @@ env:
   HAZELCAST_VERSION: 4.2
 
 jobs:
+
   run-tests:
-    name: Run Intergrational tests on GKE
+    name: Run Integrational tests on GKE
     runs-on: ubuntu-latest
     continue-on-error: true
 
@@ -161,6 +162,29 @@ jobs:
         kill $PID
 
         cat output-python.txt | grep 'Successful connection!' -q
+
+    - uses: actions/checkout@v2
+      with:
+        repository: 'https://github.com/microsoft/vcpkg.git'
+        ref: '8403a84166bf2b8b19c34545bfce171d52548651'
+        path: 'vcpkg'
+
+    - name: Test Cpp Client
+      run: |-
+        cd vcpkg
+        ./bootstrap-vcpkg.sh
+        cd -
+        EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
+        cd cpp
+        sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" main.cpp
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE={{ env.$GITHUB_WORKSPACE }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake --build build
+        build/cpp >> output-cpp.txt &
+        PID=$!
+        sleep 30
+        kill $PID
+
+        cat output-cpp.txt | grep 'Successful connection!' -q
 
     - name: Clean up
       if: always()
