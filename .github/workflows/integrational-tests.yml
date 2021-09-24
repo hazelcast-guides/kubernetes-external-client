@@ -158,7 +158,7 @@ jobs:
         cd hazelcast-cpp-client
         cmake -B build -S .
         cmake --build build
-        sudo cmake --build . --target install
+        sudo cmake --build build --target install
         cd ..
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd cpp
