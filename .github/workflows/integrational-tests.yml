@@ -148,7 +148,7 @@ jobs:
 
     - uses: actions/checkout@v2
       with:
-        repository: 'https://github.com/microsoft/vcpkg.git'
+        repository: 'microsoft/vcpkg'
         ref: '8403a84166bf2b8b19c34545bfce171d52548651'
         path: 'vcpkg'
 
