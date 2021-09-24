@@ -154,13 +154,11 @@ jobs:
 
     - name: Test Cpp Client
       run: |-
-        cd vcpkg
-        ./bootstrap-vcpkg.sh
-        cd ..
+        sudo apt-get install libboost-all-dev
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd cpp
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" main.cpp
-        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B build -S .
         cmake --build build
         build/cpp >> output-cpp.txt &
         PID=$!
