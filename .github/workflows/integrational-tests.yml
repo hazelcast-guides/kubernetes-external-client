@@ -138,7 +138,7 @@ jobs:
         cd python
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" main.py
         pip install -r requirements.txt
-        python main.py >> output-python.txt &
+        python -u main.py >> output-python.txt &
         PID=$!
         sleep 30
         kill $PID
