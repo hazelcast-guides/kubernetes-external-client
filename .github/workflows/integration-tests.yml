@@ -13,7 +13,7 @@ env:
 jobs:
 
   run-tests:
-    name: Run Integrational tests on GKE
+    name: Run Integration tests on GKE
     runs-on: ubuntu-latest
     continue-on-error: true
 
@@ -162,12 +162,6 @@ jobs:
         kill $PID
 
         cat output-python.txt | grep 'Successful connection!' -q
-
-    - uses: actions/checkout@v2
-      with:
-        repository: 'microsoft/vcpkg'
-        ref: '8403a84166bf2b8b19c34545bfce171d52548651'
-        path: 'vcpkg'
 
     - name: Test Cpp Client
       run: |-
