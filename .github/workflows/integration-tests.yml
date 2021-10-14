@@ -146,6 +146,12 @@ jobs:
 
         cat output-python.txt | grep 'Successful connection!' -q
 
+    - uses: actions/checkout@v2
+      with:
+        repository: 'hazelcast/hazelcast-cpp-client'
+        ref: 'v4.2.0'
+        path: 'hazelcast-cpp-client'
+
     - name: Test Cpp Client
       run: |-
         sudo apt-get install libboost-all-dev
@@ -163,7 +169,6 @@ jobs:
         PID=$!
         sleep 30
         kill $PID
-
         cat output-cpp.txt | grep 'Successful connection!' -q
 
       # Clean up
