@@ -1,0 +1,22 @@
+service:
+  type: "LoadBalancer"
+annotations:
+  service-per-pod-label: "statefulset.kubernetes.io/pod-name"
+  service-per-pod-ports: "5701:5701"
+initContainers:
+  - name: wait-for-lb
+    image: eu.gcr.io/hazelcast-33/kubectl-jq:0.1.0
+    env:
+      - name: POD_NAMESPACE
+        valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+      - name: POD_NAME
+        valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    command:
+      - "sh"
+      - "-c"
+    args:
+      - until [ -n "$$(kubectl get svc -n $${POD_NAMESPACE} -l app=service-per-pod -ojsonpath="{.items[?(@.spec.selector.statefulset\.kubernetes\.io/pod-name==\"$${POD_NAME}\")].status.loadBalancer.ingress[0].ip}")" ]; do sleep 8; done
