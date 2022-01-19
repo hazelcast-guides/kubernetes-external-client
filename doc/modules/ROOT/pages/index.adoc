@@ -588,13 +588,12 @@ Helm and Metacontroller::
 ----
 helm uninstall hz-hazelcast
 
-kubectl delete -f service-per-pod.yaml
-kubectl delete configmap service-per-pod-hooks -n metacontroller
+kubectl delete -k service-per-pod
 
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
-kubectl delete namespace metacontroller
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-crds-v1.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-rbac.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-namespace.yaml
 ----
 --
 ====
