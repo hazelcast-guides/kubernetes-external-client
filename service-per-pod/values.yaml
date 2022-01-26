@@ -5,16 +5,16 @@ annotations:
   service-per-pod-ports: "5701:5701"
 initContainers:
   - name: wait-for-lb
-    image: eu.gcr.io/hazelcast-33/kubectl-jq:0.1.0
+    image: bitnami/kubectl:1.22
     env:
       - name: POD_NAMESPACE
         valueFrom:
-        fieldRef:
-          fieldPath: metadata.namespace
+          fieldRef:
+            fieldPath: metadata.namespace
       - name: POD_NAME
         valueFrom:
-        fieldRef:
-          fieldPath: metadata.name
+          fieldRef:
+            fieldPath: metadata.name
     command:
       - "sh"
       - "-c"
