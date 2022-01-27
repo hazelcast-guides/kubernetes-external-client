@@ -336,13 +336,13 @@ To install https://metacontroller.app/[Metacontroller] plugin, execute the follo
 [source, shell script]
 ----
 # Create metacontroller namespace.
-kubectl create namespace metacontroller
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-namespace.yaml
 # Create metacontroller service account and role/binding.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-rbac.yaml
 # Create CRDs for Metacontroller APIs
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-crds-v1.yaml
 # Create Metacontroller StatefulSet.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
+kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller.yaml
 ----
 
 If you have any issues while creating Metacontroller, it may mean that you don't have ClusterRole access to your cluster. Please check https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#defining_permissions_in_a_role[this] for details.
@@ -353,22 +353,24 @@ To install Service-Per-Pod Decorator Controller, you need to execute the followi
 
 [source, shell script]
 ----
-kubectl create configmap service-per-pod-hooks -n metacontroller --from-file=hooks
-kubectl apply -f service-per-pod.yaml
+kubectl apply -k service-per-pod
 ----
 
 This Decorator Controller automatically creates a service for each POD marked with the specific annotations.
 
 - Start Hazelcast cluster
 
+[source, yaml]
+.values.yaml
+----
+include::../../../../service-per-pod/values.yaml[]
+----
+
 [source, bash]
 ----
 helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
 helm repo update
-helm install hz-hazelcast \
-     --set service.type=LoadBalancer \
-     --set annotations.service-per-pod-label=statefulset.kubernetes.io/pod-name,annotations.service-per-pod-ports="5701:5701" \
-     hazelcast/hazelcast
+helm install hz-hazelcast -f service-per-pod/values.yaml hazelcast/hazelcast
 ----
 --
 ====
@@ -591,13 +593,12 @@ Helm and Metacontroller::
 ----
 helm uninstall hz-hazelcast
 
-kubectl delete -f service-per-pod.yaml
-kubectl delete configmap service-per-pod-hooks -n metacontroller
+kubectl delete -k service-per-pod
 
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-crds-v1.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v1.4.2/manifests/production/metacontroller-rbac.yaml
-kubectl delete namespace metacontroller
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-crds-v1.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-rbac.yaml
+kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-namespace.yaml
 ----
 --
 ====
