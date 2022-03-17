@@ -5,7 +5,7 @@
 
 = Connect To Hazelcast Running on Kubernetes from Outside
 
-This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes.
+This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes. Hazelcast Platform Operator has complete support for external clients, you can see the operator guide https://docs.hazelcast.com/operator/latest/connect-outside-kubernetes[here].
 
 include::{templates-url}/link-to-repo.adoc[]
 
