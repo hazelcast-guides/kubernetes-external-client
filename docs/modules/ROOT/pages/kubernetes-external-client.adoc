@@ -362,7 +362,7 @@ This Decorator Controller automatically creates a service for each POD marked wi
 [source, yaml]
 .values.yaml
 ----
-include::example$kubernetes-external-client/service-per-pod/values.yaml[]
+include::example$kubernetes-external-client/values.yaml[]
 ----
 
 [source, bash]
