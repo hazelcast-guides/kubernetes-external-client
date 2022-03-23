@@ -1,19 +1,18 @@
-:github-address: https://github.com/hazelcast-guides/kubernetes-external-client
-:templates-url: templates:ROOT:page$/
-:hazelcast: Hazelcast IMDG
-:framework: Kubernetes
-
 = Connect To Hazelcast Running on Kubernetes from Outside
-
-This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes.
-
-include::{templates-url}/link-to-repo.adoc[]
+:templates-url: templates:ROOT:page$/
+:page-layout: tutorial
+:page-product: imdg
+:page-categories: Deployment, Spring Boot, Kubernetes
+:page-lang: java
+:page-est-time: 10 mins
+:framework: Kubernetes
+:description: In this tutorial, you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
 
 == What You’ll Learn
 
-In this guide you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
+{description}
 
-== Prerequisites
+== Before you Begin
 
 * Up and running https://kubernetes.io/[Kubernetes] cluster (https://minikube.sigs.k8s.io/docs/[Minikube] is good enough)
 * Kubernetes command line tool, https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubectl]
@@ -604,6 +603,7 @@ kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontrolle
 ====
 
 == See Also
-- xref:kubernetes:ROOT:index.adoc[Hazelcast for Kubernetes]
-- xref:kubernetes-hpa:ROOT:index.adoc[Kubernetes HPA for Hazelcast cluster]
-- xref:kubernetes-sidecar:ROOT:index.adoc[Hazelcast as Sidecar container]
+
+- xref:kubernetes.adoc[]
+- xref:kubernetes-hpa.adoc[]
+- xref:kubernetes-sidecar.adoc[]
