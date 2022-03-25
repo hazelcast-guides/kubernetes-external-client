@@ -5,7 +5,9 @@
 
 = Connect To Hazelcast Running on Kubernetes from Outside
 
-This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes. This guide uses Helm and Kubectl for deploying the Hazelcast cluster. If you want to use the Hazelcast Platform Operator instead, you can see the guide https://guides.hazelcast.org/hazelcast-platform-operator-expose-externally/main/[here].
+This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes. 
+
+NOTE: This guide uses Helm and Kubectl for deploying the Hazelcast cluster. If you want to use the Hazelcast Platform Operator instead, you can see the guide https://guides.hazelcast.org/hazelcast-platform-operator-expose-externally/main/[here].
 
 include::{templates-url}/link-to-repo.adoc[]
 
