@@ -271,7 +271,8 @@ C++::
 [source, bash]
 ----
 cd cpp-unisocket
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --verbose
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
 ./build/cpp-unisocket
 ----
 --
@@ -605,7 +606,8 @@ C++::
 [source, bash]
 ----
 cd cpp
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --verbose
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
 ./build/cpp
 ----
 --

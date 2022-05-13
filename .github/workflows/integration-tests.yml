@@ -165,16 +165,10 @@ jobs:
 
     - name: Test Cpp Client
       run: |-
-        sudo apt-get install libboost-all-dev
-        cd hazelcast-cpp-client
-        cmake -B build -S .
-        cmake --build build
-        sudo cmake --build build --target install
-        cd ..
         EXTERNAL_IP="${{ env.EXTERNAL_IP }}"
         cd cpp
         sed -i "s/<EXTERNAL-IP>/$EXTERNAL_IP/g" main.cpp
-        cmake -B build -S .
+        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake
         cmake --build build
         build/cpp >> output-cpp.txt &
         PID=$!
