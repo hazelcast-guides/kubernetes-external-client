@@ -5,8 +5,9 @@ on:
       - 'doc/**'
 
 env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GCP_PROJECT_ID: ${{ secrets.GKE_PROJECT }}
   GKE_ZONE: europe-west1-b
+  GCP_NETWORK: tutorial-test-network 
   HAZELCAST_VERSION: 4.2
 
 jobs:
@@ -45,24 +46,40 @@ jobs:
       with:
         python-version: 3.9
 
-    # Setup gcloud CLI
-    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@v0.2.1
+    - name: Authenticate to GCP
+      uses: 'google-github-actions/auth@v0.7.0'
       with:
-        service_account_key: ${{ secrets.GKE_SA_KEY }}
-        project_id: ${{ env.PROJECT_ID }}
-        export_default_credentials: true 
+        credentials_json: ${{ secrets.GKE_SA_KEY }}
 
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0.6.0
+      with:
+        project_id: ${{ env.GCP_PROJECT_ID }}
+
+    - name: Create GKE cluster
+      id: set-cluster-name
+      run: |-
+        REPO_NAME=$(echo $GITHUB_REPOSITORY | awk -F/ '{print $NF}')
+        CLUSTER_NAME="$REPO_NAME-$GITHUB_RUN_NUMBER"
+        echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+
+        gcloud container clusters create $CLUSTER_NAME \
+          --zone=${{ env.GKE_ZONE }} \
+          --project=${{ env.GCP_PROJECT_ID }} \
+          --network=${{ env.GCP_NETWORK }} \
+          --machine-type=n1-standard-2 \
+          --num-nodes=2
+        sleep 30
+
+    - name: Connect to the GKE cluster
+      run: |
+        gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} \
+          --zone ${{ env.GKE_ZONE }} \
+          --project ${{ env.GCP_PROJECT_ID }}
+          
     - name: Install Kubectl
       run: |-
         gcloud components install kubectl
-
-    - name: Create GKE cluster
-      run: |-
-        repoName=$(echo $GITHUB_REPOSITORY | awk -F/ '{print $NF}')
-        clusterName="$repoName-$GITHUB_RUN_NUMBER"
-        echo "clusterName=$clusterName" >> $GITHUB_ENV
-        gcloud container clusters create "$clusterName" --zone="$GKE_ZONE" --project="$PROJECT_ID" --machine-type=n1-standard-2 --num-nodes=2
-        sleep 30
 
     - name: Deploy Hazelcast cluster
       run: |-
