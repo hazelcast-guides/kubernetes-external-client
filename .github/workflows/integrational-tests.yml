@@ -76,7 +76,7 @@ jobs:
         gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} \
           --zone ${{ env.GKE_ZONE }} \
           --project ${{ env.GCP_PROJECT_ID }}
-          
+
     - name: Install Kubectl
       run: |-
         gcloud components install kubectl
@@ -162,13 +162,7 @@ jobs:
 
         cat output-python.txt | grep 'Successful connection!' -q
 
-    # Clean up
-    - name: Delete cluster
+    - name: Clean up
+      if: always()
       run: |-
-        gcloud container clusters delete "$clusterName" --zone="$GKE_ZONE" --quiet
-
-    - name: Clean up of failure
-      if: ${{ failure() }}
-      run: |-
-        gcloud container clusters delete "$clusterName" --zone="$GKE_ZONE" --quiet
-        exit 1
+        gcloud container clusters delete "$CLUSTER_NAME" --zone="$GKE_ZONE" --quiet
