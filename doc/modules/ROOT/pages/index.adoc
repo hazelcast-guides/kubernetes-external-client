@@ -196,6 +196,25 @@ client = hazelcast.HazelcastClient(
 ----
 --
 
+C++::
++
+--
+[source, cpp]
+----
+#include <hazelcast/client/hazelcast_client.h>
+
+int main(int argc, char **argv) {
+    hazelcast::client::client_config config;
+    config.get_network_config().use_public_address(true)
+                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
+                            .set_smart_routing(false);
+    auto client = hazelcast::new_client(std::move(config)).get();
+
+    return 0;
+}
+----
+--
+
 ====
 
 Finally, start the client application using the following command.
@@ -243,6 +262,18 @@ Python::
 cd python-unisocket
 pip install -r requirements.txt
 python main.py
+----
+--
+
+C++::
++
+--
+[source, bash]
+----
+cd cpp-unisocket
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
+./build/cpp-unisocket
 ----
 --
 
@@ -501,6 +532,24 @@ client = hazelcast.HazelcastClient(
 ----
 --
 
+C++::
++
+--
+[source, cpp]
+----
+#include <hazelcast/client/hazelcast_client.h>
+
+int main(int argc, char **argv) {
+    hazelcast::client::client_config config;
+    config.get_network_config().use_public_address(true)
+                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701});
+    auto client = hazelcast::new_client(std::move(config)).get();
+
+    return 0;
+}
+----
+--
+
 ====
 
 Finally, start the client application using the following command.
@@ -548,6 +597,18 @@ Python::
 cd python
 pip install -r requirements.txt
 python main.py
+----
+--
+
+C++::
++
+--
+[source, bash]
+----
+cd cpp
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
+./build/cpp
 ----
 --
 
