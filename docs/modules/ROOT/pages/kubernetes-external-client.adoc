@@ -2,11 +2,11 @@
 :templates-url: templates:ROOT:page$/
 :page-layout: tutorial
 :page-product: imdg
-:page-categories: Deployment, Spring Boot, Kubernetes
+:page-categories: Deployment, Spring Boot, Cloud Native
 :page-lang: java, node, python, go
 :page-est-time: 10 mins
 :framework: Kubernetes
-:description: In this tutorial, you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
+:description: Deploy a Hazelcast Kubernetes cluster and connect to it, using a client outside Kubernetes.
 
 == What You’ll Learn
 
