@@ -336,6 +336,11 @@ image::smart.jpg[Hazelcast Smart Client]
 
 Kubernetes does not offer a feature for automatically creating a service for each pod. That is why to set up a cluster this way we need to either expose each pod manually with `kubectl` or use the project called Metacontroller, which enables such functionality.
 
+[NOTE]
+====
+If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
+====
+
 [tabs]
 ====
 Kubectl::
@@ -446,11 +451,6 @@ kubectl get service hz-hazelcast
 NAME           TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          AGE
 hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5m29s
 ----
-
-[NOTE]
-====
-If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
-====
 
 The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
