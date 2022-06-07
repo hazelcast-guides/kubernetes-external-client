@@ -1,21 +1,20 @@
-:github-address: https://github.com/hazelcast-guides/kubernetes-external-client
-:templates-url: templates:ROOT:page$/
-:hazelcast: Hazelcast IMDG
-:framework: Kubernetes
-
 = Connect To Hazelcast Running on Kubernetes from Outside
+:templates-url: templates:ROOT:page$/
+:page-layout: tutorial
+:page-product: imdg
+:page-categories: Deployment, Spring Boot, Cloud Native
+:page-lang: java, node, python, go
+:page-est-time: 10 mins
+:framework: Kubernetes
+:description: Deploy a Hazelcast Kubernetes cluster and connect to it, using a client outside Kubernetes.
 
-This is a complete example presenting how to use Hazelcast cluster deployed on Kubernetes with Hazelcast Client running outside of Kubernetes. 
-
-NOTE: This guide uses Helm and Kubectl for deploying the Hazelcast cluster. If you want to use the Hazelcast Platform Operator instead, you can see the guide https://guides.hazelcast.org/hazelcast-platform-operator-expose-externally/main/[here].
-
-include::{templates-url}/link-to-repo.adoc[]
+NOTE: This guide uses Helm and Kubectl for deploying the Hazelcast cluster. If you want to use the Hazelcast Platform Operator instead, see xref:hazelcast-platform-operator-expose-externally.adoc[].
 
 == What You’ll Learn
 
-In this guide you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
+{description}
 
-== Prerequisites
+== Before you Begin
 
 * Up and running https://kubernetes.io/[Kubernetes] cluster (https://minikube.sigs.k8s.io/docs/[Minikube] is good enough)
 * Kubernetes command line tool, https://kubernetes.io/docs/tasks/tools/install-kubectl/[kubectl]
@@ -323,6 +322,7 @@ Helm::
 ----
 helm uninstall hz-hazelcast
 ----
+--
 ====
 
 Unisocket is very simple to configure; however, it has one significant drawback - low performance. Using a load balancer is perfect for traffic distribution across stateless services; however, Hazelcast is not stateless. Actually, Hazelcast is more like a sharded database in which each member contains a different part of the data. That is why it’s suboptimal to randomly load balance the traffic. It effectively means that each operation needs to be internally migrated, because your data may be load balanced to member 1, while the partition for its key is stored in member 2. All in all, if performance is important for your use case, then you need to use smart client.
@@ -401,7 +401,7 @@ This Decorator Controller automatically creates a service for each POD marked wi
 [source, yaml]
 .values.yaml
 ----
-include::../../../../service-per-pod/values.yaml[]
+include::example$kubernetes-external-client/values.yaml[]
 ----
 
 [source, bash]
@@ -667,6 +667,7 @@ kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontrolle
 ====
 
 == See Also
-- xref:kubernetes:ROOT:index.adoc[Hazelcast for Kubernetes]
-- xref:kubernetes-hpa:ROOT:index.adoc[Kubernetes HPA for Hazelcast cluster]
-- xref:kubernetes-sidecar:ROOT:index.adoc[Hazelcast as Sidecar container]
+
+- xref:kubernetes.adoc[]
+- xref:kubernetes-hpa.adoc[]
+- xref:kubernetes-sidecar.adoc[]
