@@ -6,7 +6,9 @@
 :page-lang: java, node, python, go
 :page-est-time: 10 mins
 :framework: Kubernetes
-:description: In this tutorial, you will learn how to deploy Hazelcast Kubernetes cluster and connect to it using a client outside Kubernetes.
+:description: In this tutorial, you will learn how to deploy a Hazelcast Kubernetes cluster and connect to it, using a client outside Kubernetes.
+
+NOTE: This guide uses Helm and Kubectl for deploying the Hazelcast cluster. If you want to use the Hazelcast Platform Operator instead, see xref:hazelcast-platform-operator-expose-externally.adoc[].
 
 == What You’ll Learn
 
@@ -193,6 +195,25 @@ client = hazelcast.HazelcastClient(
 ----
 --
 
+C++::
++
+--
+[source, cpp]
+----
+#include <hazelcast/client/hazelcast_client.h>
+
+int main(int argc, char **argv) {
+    hazelcast::client::client_config config;
+    config.get_network_config().use_public_address(true)
+                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
+                            .set_smart_routing(false);
+    auto client = hazelcast::new_client(std::move(config)).get();
+
+    return 0;
+}
+----
+--
+
 ====
 
 Finally, start the client application using the following command.
@@ -240,6 +261,18 @@ Python::
 cd python-unisocket
 pip install -r requirements.txt
 python main.py
+----
+--
+
+C++::
++
+--
+[source, bash]
+----
+cd cpp-unisocket
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
+./build/cpp-unisocket
 ----
 --
 
@@ -302,6 +335,11 @@ Hazelcast smart client is capable of mapping the given key with its owner member
 image::smart.jpg[Hazelcast Smart Client]
 
 Kubernetes does not offer a feature for automatically creating a service for each pod. That is why to set up a cluster this way we need to either expose each pod manually with `kubectl` or use the project called Metacontroller, which enables such functionality.
+
+[NOTE]
+====
+If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
+====
 
 [tabs]
 ====
@@ -414,11 +452,6 @@ NAME           TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)          A
 hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5m29s
 ----
 
-[NOTE]
-====
-If you are using Minikube, you need to execute `minikube tunnel` now in order to get LoadBalancer External IPs assigned.
-====
-
 The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
@@ -499,6 +532,24 @@ client = hazelcast.HazelcastClient(
 ----
 --
 
+C++::
++
+--
+[source, cpp]
+----
+#include <hazelcast/client/hazelcast_client.h>
+
+int main(int argc, char **argv) {
+    hazelcast::client::client_config config;
+    config.get_network_config().use_public_address(true)
+                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701});
+    auto client = hazelcast::new_client(std::move(config)).get();
+
+    return 0;
+}
+----
+--
+
 ====
 
 Finally, start the client application using the following command.
@@ -546,6 +597,18 @@ Python::
 cd python
 pip install -r requirements.txt
 python main.py
+----
+--
+
+C++::
++
+--
+[source, bash]
+----
+cd cpp
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --verbose
+./build/cpp
 ----
 --
 
