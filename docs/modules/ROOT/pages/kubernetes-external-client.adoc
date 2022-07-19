@@ -369,7 +369,7 @@ Helm and Metacontroller::
 --
 - Install Metacontroller plugin
 
-To install https://metacontroller.app/[Metacontroller] plugin, execute the following commands:
+To install https://github.com/metacontroller/metacontroller[Metacontroller] plugin, execute the following commands:
 
 [source, shell script]
 ----
