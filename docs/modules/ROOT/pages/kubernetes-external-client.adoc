@@ -334,7 +334,7 @@ Hazelcast smart client is capable of mapping the given key with its owner member
 .Hazelcast Smart Client
 image::smart.jpg[Hazelcast Smart Client]
 
-Kubernetes does not offer a feature for automatically creating a service for each pod. That is why to set up a cluster this way we need to either expose each pod manually with `kubectl` or use the project called Metacontroller, which enables such functionality.
+There are three ways for creating a service for each pod. First one is to expose each pod manually with `kubectl`, second one is to use enable externalAccess then run helm install and third one is to use the project called Metacontroller, which enables such functionality.
 
 [NOTE]
 ====
@@ -361,6 +361,20 @@ kubectl create service loadbalancer hz-hazelcast-2 --tcp=5701
 kubectl run hz-hazelcast-2 --image=hazelcast/hazelcast:$HAZELCAST_VERSION --port=5701 -l "app=hz-hazelcast-2,role=hazelcast"
 
 kubectl create service loadbalancer hz-hazelcast --tcp=5701 -o yaml --dry-run=client | kubectl set selector --local -f - "role=hazelcast" -o yaml | kubectl create -f -
+----
+--
+
+Helm with externalAccess::
++
+--
+
+Install Hazelcast with the following commands:
+
+[source, bash]
+----
+helm repo add hazelcast https://hazelcast-charts.s3.amazonaws.com/
+helm repo update
+helm install hz-hazelcast --set externalAccess.enabled=true,service.type=LoadBalancer hazelcast/hazelcast
 ----
 --
 
@@ -433,6 +447,18 @@ hz-hazelcast-2   1/1     Running   0          29s
 
 At this point, you should also have every Hazelcast member exposed with a separate externally accessible address.
 
+For helm with externalAccess enabled: 
+[source, bash]
+----
+kubectl get service
+NAME                      TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)          AGE
+hz-hazelcast              LoadBalancer   10.219.246.40    35.230.84.127    5701:30443/TCP   4m2s
+hz-hazelcast-0-external   LoadBalancer   10.219.255.141   34.145.108.167   5701:30091/TCP   4m7s
+hz-hazelcast-1-external   LoadBalancer   10.219.241.203   34.82.71.106     5701:30687/TCP   4m5s
+hz-hazelcast-2-external   LoadBalancer   10.219.247.106   35.247.93.190    5701:32452/TCP   4m4s
+----
+
+For other two options:
 [source, bash]
 ----
 kubectl get service
@@ -646,6 +672,15 @@ Kubectl::
 ----
 kubectl delete pod/hz-hazelcast-0 service/hz-hazelcast-0 pod/hz-hazelcast-1 service/hz-hazelcast-1 pod/hz-hazelcast-2 service/hz-hazelcast-2 service/hz-hazelcast
 kubectl delete -f https://raw.githubusercontent.com/hazelcast/hazelcast-kubernetes/master/rbac.yaml
+----
+--
+
+Helm with externalAccess::
++
+--
+[source, bash]
+----
+helm uninstall hz-hazelcast
 ----
 --
 
