@@ -200,17 +200,10 @@ C++::
 --
 [source, cpp]
 ----
-#include <hazelcast/client/hazelcast_client.h>
-
-int main(int argc, char **argv) {
     hazelcast::client::client_config config;
     config.get_network_config().use_public_address(true)
                             .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
                             .set_smart_routing(false);
-    auto client = hazelcast::new_client(std::move(config)).get();
-
-    return 0;
-}
 ----
 --
 
@@ -537,16 +530,9 @@ C++::
 --
 [source, cpp]
 ----
-#include <hazelcast/client/hazelcast_client.h>
-
-int main(int argc, char **argv) {
     hazelcast::client::client_config config;
     config.get_network_config().use_public_address(true)
                             .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701});
-    auto client = hazelcast::new_client(std::move(config)).get();
-
-    return 0;
-}
 ----
 --
 
