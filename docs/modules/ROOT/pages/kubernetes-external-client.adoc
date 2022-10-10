@@ -327,7 +327,7 @@ Hazelcast smart client is capable of mapping the given key with its owner member
 .Hazelcast Smart Client
 image::smart.jpg[Hazelcast Smart Client]
 
-Kubernetes does not offer a feature for automatically creating a service for each pod. That is why to set up a cluster this way we need to either expose each pod manually with `kubectl` or use the project called Metacontroller, which enables such functionality.
+Kubernetes does not offer a feature for automatically creating a service for each pod. That is why to set up a cluster this way we need to either expose each pod manually with `kubectl` or use Helm by enabling `externalAccess` feature.
 
 [NOTE]
 ====
@@ -357,39 +357,11 @@ kubectl create service loadbalancer hz-hazelcast --tcp=5701 -o yaml --dry-run=cl
 ----
 --
 
-Helm and Metacontroller::
+Helm::
 +
 --
-- Install Metacontroller plugin
 
-To install https://github.com/metacontroller/metacontroller[Metacontroller] plugin, execute the following commands:
-
-[source, shell script]
-----
-# Create metacontroller namespace.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-namespace.yaml
-# Create metacontroller service account and role/binding.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-rbac.yaml
-# Create CRDs for Metacontroller APIs
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-crds-v1.yaml
-# Create Metacontroller StatefulSet.
-kubectl apply -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller.yaml
-----
-
-If you have any issues while creating Metacontroller, it may mean that you don't have ClusterRole access to your cluster. Please check https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#defining_permissions_in_a_role[this] for details.
-
-- Install Service-Per-Pod DecoratorController
-
-To install Service-Per-Pod Decorator Controller, you need to execute the following commands.
-
-[source, shell script]
-----
-kubectl apply -k service-per-pod
-----
-
-This Decorator Controller automatically creates a service for each POD marked with the specific annotations.
-
-- Start Hazelcast cluster
+To start the Hazelcast cluster with external access feature enabled, you need to make the following configuration in the `values.yaml` file:
 
 [source, yaml]
 .values.yaml
@@ -408,7 +380,7 @@ helm install hz-hazelcast -f service-per-pod/values.yaml hazelcast/hazelcast
 
 [NOTE]
 ====
-Note that each service created per pod must start before the Hazelcast pod itself. Otherwise Hazelcast won't be able to resolve its public addresses.
+Note that each service created per pod must start before the Hazelcast pod itself. Otherwise Hazelcast won't be able to resolve its public addresses. We are achieving this by running init containers to ensure each member's matching service has its external address.
 ====
 
 === Verifying Hazelcast cluster
@@ -635,19 +607,12 @@ kubectl delete -f https://raw.githubusercontent.com/hazelcast/hazelcast-kubernet
 ----
 --
 
-Helm and Metacontroller::
+Helm::
 +
 --
 [source, bash]
 ----
 helm uninstall hz-hazelcast
-
-kubectl delete -k service-per-pod
-
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-crds-v1.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-rbac.yaml
-kubectl delete -f https://raw.githubusercontent.com/metacontroller/metacontroller/v2.1.1/manifests/production/metacontroller-namespace.yaml
 ----
 --
 ====
