@@ -114,7 +114,7 @@ If you are using Minikube, you need to execute `minikube tunnel` now in order to
 The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
-To access all examples (excluding CLC), clone the following repository
+To access all examples, clone the following repository
 
 [source, bash]
 git clone https://github.com/hazelcast-guides/kubernetes-external-client.git
@@ -456,10 +456,6 @@ hz-hazelcast   LoadBalancer   10.219.246.40   35.230.84.127   5701:30443/TCP   5
 The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
-
-[source, bash]
-git clone https://github.com/hazelcast-guides/kubernetes-external-client.git
-cd kubernetes-external-client
 
 Configure the Hazelcast client to connect to the cluster external address.
 
