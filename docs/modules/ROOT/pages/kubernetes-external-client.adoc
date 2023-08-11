@@ -114,6 +114,11 @@ If you are using Minikube, you need to execute `minikube tunnel` now in order to
 The field `EXTERNAL-IP` is the address of your Hazelcast cluster.
 
 === Connecting with Hazelcast Client
+To access all examples, clone the following repository
+
+[source, bash]
+git clone https://github.com/hazelcast-guides/kubernetes-external-client.git
+cd kubernetes-external-client
 
 Configure the Hazelcast client with the external address and disable smart routing to use the unisocket connection.
 
@@ -206,6 +211,27 @@ C++::
                             .set_smart_routing(false);
 ----
 --
+.NET::
++
+--
+[source, cs]
+----
+    var options = new HazelcastOptionsBuilder()
+        .With(args)
+        .With((configuration, options) =>
+        {
+            // configure logging factory and add the console provider
+            options.LoggerFactory.Creator = () => LoggerFactory.Create(loggingBuilder =>
+                loggingBuilder
+                    .AddConfiguration(configuration.GetSection("logging"))
+                    .AddConsole());
+            options.Networking.Addresses.Add("<EXTERNAL IP>");
+            options.Networking.SmartRouting = false;
+        })
+        .WithDefault("Logging:LogLevel:Hazelcast", "Debug")
+        .Build();
+----
+--
 
 ====
 
@@ -268,6 +294,16 @@ cmake --build build --verbose
 ./build/cpp-unisocket
 ----
 --
+.NET::
++
+--
+[source, bash]
+----
+cd dotnet-unisocket
+dotnet build
+dotnet run
+----
+
 
 ====
 
@@ -507,6 +543,29 @@ C++::
                             .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701});
 ----
 --
+.NET::
++
+--
+[source, cs]
+----
+var options = new HazelcastOptionsBuilder()
+    .With(args)
+    .With((configuration, options) =>
+    {
+        // configure logging factory and add the console provider
+        options.LoggerFactory.Creator = () => LoggerFactory.Create(loggingBuilder =>
+            loggingBuilder
+                .AddConfiguration(configuration.GetSection("logging"))
+                .AddConsole());
+
+        options.Networking.Addresses.Add("<EXTERNAL IP>");
+    })
+    .WithDefault("Logging:LogLevel:Hazelcast", "Debug")
+    .Build();
+----
+--
+
+
 
 ====
 
@@ -567,6 +626,16 @@ cd cpp
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
 cmake --build build --verbose
 ./build/cpp
+----
+--
+.NET::
++
+--
+[source, cs]
+----
+cd dotnet
+dotnet build
+dotnet run
 ----
 --
 
