@@ -2,9 +2,8 @@
 
 int main() {
     hazelcast::client::client_config config;
-    config.get_network_config().use_public_address(true)
-                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
-                            .set_smart_routing(false);
+    config.get_network_config().add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
+                               .set_smart_routing(false);
     auto hz = hazelcast::new_client(std::move(config)).get();
     std::cout << "Successful connection!" << std::endl;
     std::cout << "Starting to fill the map with random entries." << std::endl;

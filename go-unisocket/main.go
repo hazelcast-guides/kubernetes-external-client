@@ -11,8 +11,7 @@ import (
 func main() {
 	config := hazelcast.Config{}
 	cc := &config.Cluster
-	cc.Network.SetAddresses("<EXTERNAL-IP>:5701")
-	cc.Discovery.UsePublicIP = true
+	cc.Network.SetAddresses("<EXTERNAL-IP>")
 	cc.Unisocket = true
 	ctx := context.TODO()
 	client, err := hazelcast.StartNewClientWithConfig(ctx, config)
