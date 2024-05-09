@@ -23,8 +23,9 @@ namespace Client
                             .AddConsole());
 
                     options.Networking.Addresses.Add("<EXTERNAL IP>");
+                    options.Networking.UsePublicAddresses = true;
                 })
-                .WithDefault("Logging:LogLevel:Hazelcast", "Debug")                
+                .WithDefault("Logging:LogLevel:Hazelcast", "Debug")
                 .Build();
 
 
