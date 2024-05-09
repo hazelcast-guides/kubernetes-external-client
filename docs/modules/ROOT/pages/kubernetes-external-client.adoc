@@ -466,6 +466,7 @@ Java::
 ----
 ClientConfig config = new ClientConfig();
 config.getNetworkConfig().addAddress("<EXTERNAL-IP>");
+config.getProperties().setProperty(ClientProperty.DISCOVERY_SPI_PUBLIC_IP_ENABLED.toString(), "true");
 ----
 --
 

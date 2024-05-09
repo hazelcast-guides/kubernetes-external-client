@@ -2,6 +2,7 @@ package com.hazelcast;
 
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.properties.ClientProperty;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 
@@ -11,6 +12,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ClientConfig config = new ClientConfig();
         config.getNetworkConfig().addAddress("<EXTERNAL-IP>");
+        config.getProperties().setProperty(ClientProperty.DISCOVERY_SPI_PUBLIC_IP_ENABLED.toString(), "true");
         HazelcastInstance client = HazelcastClient.newHazelcastClient(config);
 
         System.out.println("Successful connection!");
