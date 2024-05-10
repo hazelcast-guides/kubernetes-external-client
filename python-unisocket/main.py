@@ -7,7 +7,6 @@ logging.basicConfig(level=logging.INFO)
 
 client = hazelcast.HazelcastClient(
     cluster_members=["<EXTERNAL-IP>"],
-    use_public_ip=True,
     smart_routing=False,
 )
 

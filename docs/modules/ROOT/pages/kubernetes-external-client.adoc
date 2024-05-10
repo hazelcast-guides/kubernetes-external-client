@@ -169,8 +169,7 @@ import (
 func main() {
 	config := hazelcast.Config{}
 	cc := &config.Cluster
-	cc.Network.SetAddresses("<EXTERNAL-IP>:5701")
-	cc.Discovery.UsePublicIP = true
+	cc.Network.SetAddresses("<EXTERNAL-IP>")
 	cc.Unisocket = true
 	ctx := context.TODO()
 	client, err := hazelcast.StartNewClientWithConfig(ctx, config)
@@ -194,7 +193,6 @@ logging.basicConfig(level=logging.INFO)
 
 client = hazelcast.HazelcastClient(
     cluster_members=["<EXTERNAL-IP>"],
-    use_public_ip=True,
     smart_routing=False,
 )
 ----
@@ -205,9 +203,8 @@ C++::
 --
 [source, cpp]
 ----
-    hazelcast::client::client_config config;
-    config.get_network_config().use_public_address(true)
-                            .add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
+hazelcast::client::client_config config;
+config.get_network_config().add_address(hazelcast::client::address{"<EXTERNAL-IP>", 5701})
                             .set_smart_routing(false);
 ----
 --
@@ -469,6 +466,7 @@ Java::
 ----
 ClientConfig config = new ClientConfig();
 config.getNetworkConfig().addAddress("<EXTERNAL-IP>");
+config.getProperties().setProperty(ClientProperty.DISCOVERY_SPI_PUBLIC_IP_ENABLED.toString(), "true");
 ----
 --
 
@@ -484,6 +482,9 @@ const clientConfig = {
         clusterMembers: [
             '<EXTERNAL-IP>'
         ]
+    },
+    properties: {
+        ['hazelcast.discovery.public.ip.enabled']: true
     }
 };
 const client = await Client.newHazelcastClient(clientConfig);
@@ -504,7 +505,7 @@ import (
 func main() {
 	config := hazelcast.Config{}
 	cc := &config.Cluster
-	cc.Network.SetAddresses("<EXTERNAL-IP>:5701")
+	cc.Network.SetAddresses("<EXTERNAL-IP>")
 	cc.Discovery.UsePublicIP = true
 	ctx := context.TODO()
 	client, err := hazelcast.StartNewClientWithConfig(ctx, config)
@@ -559,13 +560,12 @@ var options = new HazelcastOptionsBuilder()
                 .AddConsole());
 
         options.Networking.Addresses.Add("<EXTERNAL IP>");
+        options.Networking.UsePublicAddresses = true;
     })
     .WithDefault("Logging:LogLevel:Hazelcast", "Debug")
     .Build();
 ----
 --
-
-
 
 ====
 

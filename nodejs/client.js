@@ -7,6 +7,9 @@ const clientConfig = {
         clusterMembers: [
             '<EXTERNAL-IP>'
         ]
+    },
+    properties: {
+        ['hazelcast.discovery.public.ip.enabled']: true
     }
 };
 
